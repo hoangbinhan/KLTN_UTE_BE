@@ -2,7 +2,7 @@ const Post = require('../models/employees.model');
 const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function')
 
- class TestServices {
+class TestServices {
     //
     static async get(req, res) {
         try {
@@ -12,8 +12,6 @@ const service = require('../common/function')
             res.json({ message: err })
         }
     }
-
-    
     //
     static async getById(req, res) {
         try {
@@ -23,10 +21,10 @@ const service = require('../common/function')
             res.json({ message: err });
         }
     }
-    //
+    ////
     static async create(req, res) {
         const post = new Post({
-            employeeID : service.generateID('emplyee'),
+            employeeID: service.generateID('emplyee'),
             // employeeID: req.body.employeeID,
             firstName: req.body.firstName,
             lastName: req.body.lastName,
@@ -88,6 +86,6 @@ const service = require('../common/function')
         }
     }
 }
-module.exports = { 
+module.exports = {
     TestServices
 }
