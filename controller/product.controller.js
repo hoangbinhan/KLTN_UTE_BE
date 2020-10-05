@@ -42,6 +42,7 @@ class TestServices {
             res.status(200).json(result);
         })
     }
+
     //
     static async get(req, res) {
         try {
