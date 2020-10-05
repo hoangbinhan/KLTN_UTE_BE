@@ -59,7 +59,7 @@ const OrderSchema = mongoose.Schema({
     },
     status:{
         type: String,
-        default: 'ACTIVE'
+        default: 'PENDING'
     }
 });
 module.exports = mongoose.model('Orders', OrderSchema);

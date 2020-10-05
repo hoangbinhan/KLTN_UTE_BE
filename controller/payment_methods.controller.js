@@ -24,8 +24,8 @@ const service = require('../common/function')
     //
     static async create(req, res) {
         const post = new Post({
-            // id : service.generateID(),
-            paymentMethodID: req.body.paymentMethodID,
+            paymentMethodID : service.generateID('paymentMethodID'),
+            // paymentMethodID: req.body.paymentMethodID,
             paymentMethod: req.body.paymentMethod,
             creditCard: req.body.creditCard
         });
