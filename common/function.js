@@ -1,5 +1,5 @@
 function generateID (name) { 
-    return name+'_' + Math.random().toString(36).substr(2, 9);
+    return name +'_' + Math.random().toString(36).substr(2, 9);
 }
 
 const genUpdate = (data, arrValue) => {

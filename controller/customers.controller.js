@@ -24,8 +24,7 @@ class TestServices {
     //
     static async create(req, res) {
         const post = new Post({
-            id : service.generateID('customer'),
-            // customerID: req.body.customerID,
+            customerID : service.generateID('customer'),
             companyName: req.body.companyName,
             contactFirstname: req.body.contactFirstname,
             contactLastname: req.body.contactLastname,
