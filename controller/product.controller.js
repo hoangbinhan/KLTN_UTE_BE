@@ -1,39 +1,103 @@
 const Post = require('../models/products.model');
 const STATUS_TYPE = require('../common/constants').statusActive
-const service = require('../common/function')
+const service = require('../common/function');
+const { json } = require('body-parser');
 
- class TestServices {
+class APIfeatures {
+    constructor(query, queryString) {
+        this.query = query;
+        this.queryString = queryString;
+    }
+    filtering() {
+        const queryObj = {...this.queryString};
+        console.log(queryObj);
+        const excludedfields = ['page','sort','limit'];
+        excludedfields.forEach(el=>delete queryObj[el]);
+        let querystr = JSON.stringify(queryObj);
+        querystr = querystr.replace(/\b(gte|gt|lt|lte)\b/g, match =>`$${match}`);
+        this.query.find(JSON.parse(querystr));
+        return this;
+    }
+    sorting() {
+        if (this.queryString.sort) {
+            const sortby = this.queryString.sort.split(',').join(' ');
+            this.query = this.query.sort(sortby);
+        }else {
+            this.query =this.query.sort('-createAt');
+        }
+        return this;
+    }
+    paginating() {
+        const page = this.queryString.page * 1 || 1;
+        const limit = this.queryString.limit * 1 || 4;
+        const skip = (page - 1) * limit;
+        this.query = this.query.skip(skip).limit(limit);
+        return this;
+    }
+}
+class TestServices {
     //
     static async get(req, res) {
         try {
-            const payload = await Post.find()
-            res.json(payload)
+            const features = new APIfeatures(Post.find(), req.query)
+            .filtering()
+            .sorting()
+            .paginating();
+            const payload = await features.query;
+            res.status(200).json({
+                status: 'success',
+                result: payload.length,
+                data: {
+                    payload
+                }
+            });
         } catch (err) {
-            res.json({ message: err })
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
         }
     }
     //
     static async getById(req, res) {
         try {
             const payload = await Post.findOne({ productID: req.params.id })
-            res.json(payload)
+            res.status(200).json({
+                status: 'success',
+                result: payload.length,
+                data: {
+                    payload
+                }
+            });
         } catch (err) {
-            res.json({ message: err });
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
         }
     }
     //
     static async create(req, res) {
         const post = new Post({
-            productID : service.generateID('productID'),
+            productID: service.generateID('productID'),
             // productID: req.body.productID,
             productName: req.body.productName,
             unitPrice: req.body.unitPrice
         });
         try {
             const savePost = await post.save();
-            res.json(savePost);
+            res.status(200).json({
+                status: 'success',
+                result: savePost.length,
+                data: {
+                    savePost
+                }
+            });
         } catch (err) {
-            res.json({ message: err });
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
         }
     }
     //Edit
@@ -44,7 +108,10 @@ const service = require('../common/function')
                 ['productName', 'unitPrice', 'status'])
             await Post.findOneAndUpdate({ productID }, updateField, { new: true }, (err, result) => {
                 if (result || !err) {
-                    res.json(result)
+                    res.status(200).json({
+                        status: 'success',
+                        data: result
+                    });
                 } else {
                     res.json(false)
                 }
@@ -82,6 +149,6 @@ const service = require('../common/function')
     //     }
     // }
 }
-module.exports = { 
+module.exports = {
     TestServices
 }
