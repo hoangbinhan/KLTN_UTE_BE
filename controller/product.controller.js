@@ -36,6 +36,13 @@ class APIfeatures {
     }
 }
 class TestServices {
+    static async search(req, res) {
+        var regex = new RegExp(req.params.productName, 'i');
+        Post.find({productName:regex}).then((result) => {
+            res.status(200).json(result);
+        })
+    }
+
     //
     static async get(req, res) {
         try {
