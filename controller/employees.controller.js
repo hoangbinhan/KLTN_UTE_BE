@@ -1,19 +1,10 @@
 const Post = require('../models/employees.model');
 const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function');
-const counter = require('../models/numberID');
+
 
 class TestServices {
     //
-    static async getIDID(name) {
-        console.log("aaaaaaaaaa");
-        var cos = counter.findByIdAndUpdate({
-            query : {ID: name},
-            update : { $inc : {req:1}},
-            new : true
-        });
-        return cos.req; 
-    }
     //
     static async get(req, res) {
         try {
@@ -36,8 +27,6 @@ class TestServices {
     static async create(req, res) {
         const post = new Post({
             employeeID: service.generateID('employee'),
-            // employeeID: this.getIDID('employeeID'),
-            // employeeID: req.body.employeeID,
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             age: req.body.age,

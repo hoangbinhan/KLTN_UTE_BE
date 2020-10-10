@@ -9,6 +9,18 @@ const ProductSchema = mongoose.Schema({
         type : String,
         required : true
     },
+    image : {
+        type : String,
+        required : true
+    },
+    publishIdImage : {
+        type : String,
+        required : true
+    },
+    url : {
+        type : String,
+        required : true
+    },
     unitPrice : {
         type : String,
         required : true
