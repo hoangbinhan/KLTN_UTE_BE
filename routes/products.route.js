@@ -3,7 +3,6 @@ const router = express.Router();
 const TestServices = require('../controller/product.controller')
 const multerConfig = require('../common/multer');
 
-
 router.get('/search/:productName', TestServices.TestServices.search)
 router.get('/', TestServices.TestServices.get)
 router.get('/:id', TestServices.TestServices.getById)
