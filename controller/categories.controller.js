@@ -88,23 +88,18 @@ class TestServices {
 
     // Multer IMG
     static async uploadIMG(req, res) {
-        const result = await cloud.upload(req.files[0].path)
-        console.log('req.files[0]', req.files[0])
+        const result = await cloud.upload(req.body.upload[0].thumbUrl)
         var post = new Post({
             categoryID: service.generateID('productID'),
             categoryName: req.body.categoryName,
-            image: req.files[0].originalname,
-            url: result.url,
+            image: result.url,
             link: req.body.link,
-            // thêm fields này trong model cho hàm delete file 
-            publishIdImage: result.id,
             sortOrder: req.body.sortOrder,
-            children: req.body.children,
+            children: req.body.children || [],
             status: req.body.status
         });
         try {
             const savePost = await post.save();
-            fs.unlinkSync(req.files[0].path)
             res.status(200).json({
                 status: 'success',
                 result: savePost.length,

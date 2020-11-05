@@ -17,14 +17,6 @@ const CategorySchema = mongoose.Schema({
         type : String,
         required : true
     },
-    publishIdImage : {
-        type : String,
-        required : true
-    },
-    url : {
-        type : String,
-        required : true
-    },
     sortOrder : {
         type : Number,
         required : true

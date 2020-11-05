@@ -7,7 +7,7 @@ router.get('/search/:categoryName', TestServices.TestServices.search)
 router.get('/', TestServices.TestServices.get)
 router.get('/:id', TestServices.TestServices.getById)
 // router.post('/', TestServices.TestServices.create)
-router.post('/',multerConfig, TestServices.TestServices.uploadIMG)
+router.post('/', TestServices.TestServices.uploadIMG)
 router.put('/', multerConfig, TestServices.TestServices.update)
 router.delete('/', TestServices.TestServices.delete)
 
