@@ -1,10 +1,5 @@
 const mongoose = require('mongoose');
 const CategorySchema = mongoose.Schema({
-    // categoryID : {
-    //     type : String,
-    //     required : true,
-    //     // default: ''
-    // },
     categoryName : {
         type : String,
         required : true
@@ -14,7 +9,7 @@ const CategorySchema = mongoose.Schema({
         require:true
     },
     image : {
-        type : String,
+        type : Object,
         required : true
     },
     sortOrder : {
@@ -27,6 +22,14 @@ const CategorySchema = mongoose.Schema({
     status:{
         type: String,
         default: 'ACTIVE'
+    },
+    imageUrl:{
+        type: String,
+        required: true
+    },
+    imageId: {
+        type: String,
+        required: true
     }
 });
 module.exports = mongoose.model('Categories', CategorySchema);
