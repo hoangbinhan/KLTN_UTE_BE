@@ -131,41 +131,13 @@ class TestServices {
     //Edit
     static async update(req, res) {
         try {
-            // const resultImage = {}
-            // const { _id } = req.body
-            // // thêm 1 biến check xem có thay đổi image k 
-            // const isUpdateImage = req.body.isUpdateImage
-            // if(isUpdateImage){
-            // //check file có tồn tại hay k
-            //     const file = req.files[0].path
-            //     if(!file){
-            //         return res.status(400).json({
-            //             status: 'fail',
-            //             message: 'K có file'
-            //         })
-            //     }
-            //     resultImage = await TestServices.editImage(productID, file)
-            // }
-            // const updateField = service.genUpdate(req.body,
-            //     ['productName','unitPrice', 'status'])
-            // if(!_isEmpty(resultImage)){
-            //     updateField.image = resultImage.url
-            //     updateField.publishIdImage = resultImage.id
-            // }
-            // await Post.findOneAndUpdate({ productID }, updateField, { new: true }, (err, result) => {
-            //     if (result || !err) {
-            //         res.status(200).json({
-            //             status: 'success',
-            //             data: result
-            //         });
-            //     } else {
-            //         res.json(false)
-            //     }
-            // })
-
-            const {_id} = req.body
-            await Post.findOneAndUpdate({ _id }, req.body, { new: true }, (err, result) => {
-                console.log('req.body', req.body)
+            let temp = {...req.body}
+            if(temp.upload){
+                const result = await cloud.upload(temp.upload[0].thumbUrl)
+                temp = {...temp, image: temp.upload[0],  imageUrl: result.url, imageId: result.id}
+            }
+            const {_id} = temp
+            await Post.findOneAndUpdate({ _id }, temp, { new: true }, (err, result) => {
                 if (result || !err) {
                     res.status(200).json({
                         status: 'success',

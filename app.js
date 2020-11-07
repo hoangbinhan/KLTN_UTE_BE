@@ -24,9 +24,11 @@ const paymentrouter = require('./routes/payments.route');
 const productrouter = require('./routes/products.route');
 const shipping_methodrouter = require('./routes/shipping_methods.route');
 const categoriesrouter = require('./routes/categories.route')
+const children_category = require('./routes/children_category.route')
 //
 app.use(cors(corsOptions))
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.static("public"));
 
 app.use('/api/customer', customersrouter);
@@ -38,6 +40,7 @@ app.use('/api/payment', paymentrouter);
 app.use('/api/product', productrouter);
 app.use('/api/shipping_method', shipping_methodrouter);
 app.use('/api/categories', categoriesrouter)
+app.use('/api/children_category', children_category)
 //Router
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');
