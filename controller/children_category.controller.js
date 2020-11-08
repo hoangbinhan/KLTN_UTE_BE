@@ -1,6 +1,7 @@
 const Post = require('../models/children_category.model')
+const Parent = require('../models/categories.model')
 const service = require('../common/function')
-const { times } = require('lodash')
+const { times, isBuffer } = require('lodash')
 
 class APIfeatures {
     constructor(query, queryString){
@@ -11,19 +12,22 @@ class APIfeatures {
 
 class TestServices {
     static async addNew(req,res){
+        console.log('req.body', req.body)
         let post = new Post({
             childrenCategoryName : req.body.childrenCategoryName,
             link: req.body.link,
             sortOrder : req.body.sortOrder,
             status: req.body.status
         })
-        try{
+
+        try{ 
             const savePost = await post.save()
+            Parent.findOneAndUpdate({_id: req.body.categoryId}, {$push: {children: post._id}}, (err)=>{})
             res.status(200).json({
                 status: 'success',
                 result: savePost.length,
                 data: {
-                    savePost
+                    savePost,
                 }
             })
         }catch(err){

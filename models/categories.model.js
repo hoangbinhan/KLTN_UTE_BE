@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const CategorySchema = mongoose.Schema({
+
     categoryName : {
         type : String,
         required : true
@@ -17,7 +18,7 @@ const CategorySchema = mongoose.Schema({
         required : true
     },
     children:{
-        type: Array,
+        type: [{type:mongoose.Schema.Types.ObjectId}],
     },
     status:{
         type: String,
