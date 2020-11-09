@@ -12,7 +12,6 @@ const genUpdate = (data, arrValue) => {
     return genObject
   }
 
-
 module.exports = { 
     generateID,
     genUpdate

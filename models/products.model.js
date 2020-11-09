@@ -9,25 +9,43 @@ const ProductSchema = mongoose.Schema({
         type : String,
         required : true
     },
+    description:{
+        type: String,
+        required:true
+    },
+    quantity: {
+        type: Number,
+        require: true
+    },
+    price:{
+        type: Number,
+        required: true
+    },
+    discountPrice:{
+        type: Number,
+        required: true
+    },
+    guarantee:{
+        type: Number,
+        required: true
+    },
+    status: {
+        type: String, 
+        required: true
+    },
     image : {
         type : String,
         required : true
     },
-    publishIdImage : {
+    detailDescription:{
         type : String,
-        required : true
     },
-    url : {
-        type : String,
-        required : true
+    detailConfiguration:{
+        type: Array
     },
-    unitPrice : {
-        type : String,
-        required : true
+    picture: {
+        type: Array,
+        required: true
     },
-    status:{
-        type: String,
-        default: 'ACTIVE'
-    }
 });
 module.exports = mongoose.model('Products', ProductSchema);
