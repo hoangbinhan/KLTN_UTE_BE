@@ -49,41 +49,23 @@ class ProductServices {
     }
     //GetALL
     static async get(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                // const features = new APIfeatures(Product.find(), req.query)
-                //     .filtering()
-                //     .sorting()
-                //     .paginating();
-                // const payload = await features.query;
-                // res.status(200).json({
-                //     status: 'success',
-                //     result: payload.length,
-                //     data: {
-                //         payload
-                //     }
-                // });
-                const features = new APIfeatures(Product.aggregate([
+                Product.aggregate([
                     {$lookup:{
                         from: 'categories',
                         localField: 'category',
                         foreignField: '_id',
                         as: 'model'
                     }}
-                ], function(req,res){
-                    return res.json()
-                }), req.query)
-                    .filtering()
-                    .sorting()
-                    .paginating();
-                const payload = await features.query;
-                res.status(200).json({
-                    status: 'success',
-                    result: payload.length,
-                    data: {
-                        payload
-                    }
-                });
+                ]).exec(function(err, data){
+                    if(err)return
+                    return res.status(200).json({
+                        status:'success',
+                        result: data.length,
+                        data
+                    })
+                })
+
             } catch (err) {
                 res.status(400).json({
                     status: 'fail',
@@ -96,7 +78,7 @@ class ProductServices {
     static async getById(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const payload = await Product.findOne({ productID: req.params.id })
+                const payload = await Product.findOne({ _id: req.params.id })
                 res.status(200).json({
                     status: 'success',
                     result: payload.length,
