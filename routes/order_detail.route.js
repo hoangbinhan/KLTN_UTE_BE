@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const TestServices = require('../controller/orders_detail.controller')
+const Order_detailServices = require('../controller/orders_detail.controller')
 
 
-router.get('/', TestServices.TestServices.get)
-router.get('/:id', TestServices.TestServices.getById)
-router.post('/', TestServices.TestServices.create)
-router.put('/', TestServices.TestServices.update)
-router.delete('/', TestServices.TestServices.delete)
+router.get('/', Order_detailServices.get)
+router.get('/:id', Order_detailServices.getById)
+router.post('/', Order_detailServices.create)
+router.put('/', Order_detailServices.update)
+router.delete('/', Order_detailServices.delete)
 
 module.exports = router;
 

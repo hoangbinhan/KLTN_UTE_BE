@@ -1,72 +1,83 @@
-const Post = require('../models/payment_methods.model');
+const Payment_method = require('../models/payment_methods.model');
 const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function')
+const BaseAPI = require('../common/token');
 
- class TestServices {
+class Payment_methodServices {
     //
     static async get(req, res) {
-        try {
-            const payload = await Post.find()
-            res.json(payload)
-        } catch (err) {
-            res.json({ message: err })
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const payload = await Payment_method.find()
+                res.json(payload)
+            } catch (err) {
+                res.json({ message: err })
+            }
+        // });
     }
     //
     static async getById(req, res) {
-        try {
-            const payload = await Post.findOne({ paymentMethodID: req.params.id })
-            res.json(payload)
-        } catch (err) {
-            res.json({ message: err });
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const payload = await Payment_method.findOne({ paymentMethodID: req.params.id })
+                res.json(payload)
+            } catch (err) {
+                res.json({ message: err });
+            }
+        // });
     }
     //
     static async create(req, res) {
-        const post = new Post({
-            paymentMethodID : service.generateID('paymentMethodID'),
-            // paymentMethodID: req.body.paymentMethodID,
-            paymentMethod: req.body.paymentMethod,
-            creditCard: req.body.creditCard
-        });
-        try {
-            const savePost = await post.save();
-            res.json(savePost);
-        } catch (err) {
-            res.json({ message: err });
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            const post = new Payment_method({
+                paymentMethodID: service.generateID('paymentMethodID'),
+                // paymentMethodID: req.body.paymentMethodID,
+                paymentMethod: req.body.paymentMethod,
+                creditCard: req.body.creditCard
+            });
+            try {
+                const savePost = await post.save();
+                res.json(savePost);
+            } catch (err) {
+                res.json({ message: err });
+            }
+        // });
     }
     //Edit
     static async update(req, res) {
-        try {
-            const { paymentMethodID } = req.body
-            const updateField = service.genUpdate(req.body,
-                ['paymentMethod', 'creditCard', 'status'])
-            await Post.findOneAndUpdate({ paymentMethodID }, updateField, { new: true }, (err, result) => {
-                if (result || !err) {
-                    res.json(result)
-                } else {
-                    res.json(false)
-                }
-            })
-        } catch (error) {
-            res.status(500).send('error :' + error)
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const { paymentMethodID } = req.body
+                const updateField = service.genUpdate(req.body,
+                    ['paymentMethod', 'creditCard', 'status'])
+                await Payment_method.findOneAndUpdate({ paymentMethodID }, updateField, { new: true }, (err, result) => {
+                    if (result || !err) {
+                        res.json(result)
+                    } else {
+                        res.json(false)
+                    }
+                })
+            } catch (error) {
+                res.status(500).send('error :' + error)
+            }
+        // });
     }
     //Delete
     static async delete(req, res) {
-        try {
-            const { paymentMethodID } = req.body
-            await Post.deleteOne({ paymentMethodID }, async (err, result) => {
-                if (result || !err) {
-                    res.json(result)
-                } else {
-                    res.json(false)
-                }
-            })
-        } catch (error) {
-            res.send('error :' + error)
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const { paymentMethodID } = req.body
+                await Payment_method.deleteOne({ paymentMethodID }, async (err, result) => {
+                    if (result || !err) {
+                        res.json(result)
+                    } else {
+                        res.json(false)
+                    }
+                })
+            } catch (error) {
+                res.send('error :' + error)
+            }
+        // });
     }
     //Delete Status
     // static async deletestatus(req, res) {
@@ -82,6 +93,4 @@ const service = require('../common/function')
     //     }
     // }
 }
-module.exports = { 
-    TestServices
-}
+module.exports = Payment_methodServices

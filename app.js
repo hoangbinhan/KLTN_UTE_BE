@@ -2,12 +2,30 @@ const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
 
 //require dotenv
 const dotenv = require('dotenv');
+
+
+
 dotenv.config();
 // setup express
 const app = express()
+
+app.use(express.json())
+app.use(bodyParser.json())
+app.use(express.static("public"))
+
+app.use(cors())
+app.use(cookieParser())
+app.use(fileUpload({
+    useTempFiles: true
+}))
+
+
 // Import Router
 const customersrouter = require('./routes/customers.route');
 const employeesrouter = require('./routes/employees.route');
@@ -17,18 +35,24 @@ const payment_methodrouter = require('./routes/payment_methods.route');
 const paymentrouter = require('./routes/payments.route');
 const productrouter = require('./routes/products.route');
 const shipping_methodrouter = require('./routes/shipping_methods.route');
+const uploadImage = require('./routes/upload.route');
+const user = require('./routes/users.route');
 //
-app.use(bodyParser.json());
-app.use(express.static("public"));
 
-app.use('/api/customer', customersrouter);
+
+
+app.use('/api/customers', customersrouter);
 app.use('/api/employees', employeesrouter);
 app.use('/api/order_detail', order_detailrouter);
 app.use('/api/order', orderrouter);
 app.use('/api/payment_method', payment_methodrouter);
 app.use('/api/payment', paymentrouter);
-app.use('/api/product', productrouter);
+app.use('/api/products', productrouter);
 app.use('/api/shipping_method', shipping_methodrouter);
+app.use('/api/upload', uploadImage)
+app.use('/api/user', user);
+//
+
 //Router
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');
@@ -44,7 +68,7 @@ mongoose.connect(process.env.MONGO_URL, {
   useFindAndModify: false,
   useNewUrlParser: true,
   useCreateIndex: true
-})
+}) 
   .then(async () => {
     console.log('Database connection created')
   }).catch((err) => {

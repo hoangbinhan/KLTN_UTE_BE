@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const TestServices = require('../controller/customers.controller')
+const CustomerServices = require('../controller/customers.controller')
 
 
-router.get('/', TestServices.TestServices.get)
-router.get('/:id', TestServices.TestServices.getById)
-router.post('/', TestServices.TestServices.create)
-router.put('/', TestServices.TestServices.update)
-router.delete('/', TestServices.TestServices.delete)
+router.get('/', CustomerServices.get)
+router.get('/:id', CustomerServices.getById)
+router.post('/', CustomerServices.create)
+router.put('/', CustomerServices.update)
+router.delete('/', CustomerServices.delete)
 
 module.exports = router;
 

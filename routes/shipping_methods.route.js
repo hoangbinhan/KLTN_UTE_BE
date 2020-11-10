@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const TestServices = require('../controller/shipping_methods.controller')
+const ShippingServices = require('../controller/shipping_methods.controller')
 
 
-router.get('/', TestServices.TestServices.get)
-router.get('/:id', TestServices.TestServices.getById)
-router.post('/', TestServices.TestServices.create)
-router.put('/', TestServices.TestServices.update)
-router.delete('/', TestServices.TestServices.delete)
+router.get('/', ShippingServices.get)
+router.get('/:id', ShippingServices.getById)
+router.post('/', ShippingServices.create)
+router.put('/', ShippingServices.update)
+router.delete('/', ShippingServices.delete)
 
 module.exports = router;
 
