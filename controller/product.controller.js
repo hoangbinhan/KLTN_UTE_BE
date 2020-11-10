@@ -1,9 +1,8 @@
-const Post = require('../models/products.model');
-const STATUS_TYPE = require('../common/constants').statusActive
+const Product = require('../models/products.model');
+// const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function');
-const cloud = require('../common/cloudinaryConfig');
-const fs = require('fs');
-const _isEmpty = require('lodash').isEmpty
+const BaseAPI = require('../common/token');
+
 
 class APIfeatures {
     constructor(query, queryString) {
@@ -37,149 +36,122 @@ class APIfeatures {
         return this;
     }
 }
-class TestServices {
+class ProductServices {
     //Search
     static async search(req, res) {
-        var regex = new RegExp(req.params.productName, 'i');
-        Post.find({ productName: regex }).then((result) => {
-            res.status(200).json(result);
-        })
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            var regex = new RegExp(req.params.productName, 'i');
+            Product.find({ productName: regex }).then((result) => {
+                res.status(200).json(result);
+            })
+        // });
     }
     //GetALL
     static async get(req, res) {
-        try {
-            const features = new APIfeatures(Post.find(), req.query)
-                .filtering()
-                .sorting()
-                .paginating();
-            const payload = await features.query;
-            res.status(200).json({
-                status: 'success',
-                result: payload.length,
-                data: {
-                    payload
-                }
-            });
-        } catch (err) {
-            res.status(400).json({
-                status: 'fail',
-                message: err
-            });
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const features = new APIfeatures(Product.find(), req.query)
+                    .filtering()
+                    .sorting()
+                    .paginating();
+                const payload = await features.query;
+                res.status(200).json({
+                    status: 'success',
+                    result: payload.length,
+                    data: {
+                        payload
+                    }
+                });
+            } catch (err) {
+                res.status(400).json({
+                    status: 'fail',
+                    message: err
+                });
+            }
+        // });
     }
     // getID
     static async getById(req, res) {
-        try {
-            const payload = await Post.findOne({ productID: req.params.id })
-            res.status(200).json({
-                status: 'success',
-                result: payload.length,
-                data: {
-                    payload
-                }
-            });
-        } catch (err) {
-            res.status(400).json({
-                status: 'fail',
-                message: err
-            });
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const payload = await Product.findOne({ productID: req.params.id })
+                res.status(200).json({
+                    status: 'success',
+                    result: payload.length,
+                    data: {
+                        payload
+                    }
+                });
+            } catch (err) {
+                res.status(400).json({
+                    status: 'fail',
+                    message: err
+                });
+            }
+        // });
     }
-
     // Multer IMG
-    static async uploadIMG(req, res) {
-        const result = await cloud.upload(req.files[0].path)
-        var post = new Post({
-            productID: service.generateID('productID'),
-            productName: req.body.productName,
-            image: req.files[0].originalname,
-            url: result.url,
-            // thêm fields này trong model cho hàm delete file 
-            publishIdImage: result.id,
-            unitPrice: req.body.unitPrice
-        });
-        try {
-            const savePost = await post.save();
-            fs.unlinkSync(req.files[0].path)
-            res.status(200).json({
-                status: 'success',
-                result: savePost.length,
-                data: {
-                    savePost
-                }
-            });
-        } catch (err) {
-            res.status(400).json({
-                status: 'fail',
-                message: err
-            });
-        }
-    }
+    static async create(req, res) {
+        // BaseAPI.authorizationAPI(req, res, async () => {
 
-    static async editImage(productID, file){
-        const resultImage = {}
-        const oldPost = await Post.findOne({ productID })
-        if(_isEmpty(oldPost)){
-            return res.json(false)
-        }
-        //delete thằng cũ 
-        // await cloud.delete(oldPost.publishIdImage || 0)
-        //upload mới rồi return 
-        return !_isEmpty(await cloud.upload(file)) ? resultImage : {}
+            var post = new Product({
+                productID: service.generateID('productID'),
+                productName: req.body.productName,
+                images: req.body.images,
+                unitPrice: req.body.unitPrice
+            });
+            try {
+                const savePost = await post.save();
+                res.status(200).json({
+                    status: 'success',
+                    data: savePost
+                });
+            } catch (err) {
+                res.status(400).json({
+                    status: 'fail',
+                    message: err
+                });
+            }
+        // });
     }
-
     //Edit
     static async update(req, res) {
-        try {
-            const resultImage = {}
-            const { productID } = req.body
-            // thêm 1 biến check xem có thay đổi image k 
-            const isUpdateImage = req.body.isUpdateImage
-            if(isUpdateImage){
-            //check file có tồn tại hay k
-                const file = req.files[0].path
-                if(!file){
-                    return res.status(400).json({
-                        status: 'fail',
-                        message: 'K có file'
-                    })
-                }
-                resultImage = await TestServices.editImage(productID, file)
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const { productID } = req.body
+                const updateField = service.genUpdate(req.body,
+                    ['productName', 'unitPrice', 'status', 'images'])
+                await Product.findOneAndUpdate({ productID }, updateField, { new: true }, (err, result) => {
+                    if (result || !err) {
+                        res.status(200).json({
+                            status: 'success',
+                            data: result
+                        });
+                    } else {
+                        res.json(false)
+                    }
+                })
+            } catch (error) {
+                res.status(500).send('error :' + error)
             }
-            const updateField = service.genUpdate(req.body,
-                ['productName','unitPrice', 'status'])
-            if(!_isEmpty(resultImage)){
-                updateField.image = resultImage.url
-                updateField.publishIdImage = resultImage.id
-            }
-            await Post.findOneAndUpdate({ productID }, updateField, { new: true }, (err, result) => {
-                if (result || !err) {
-                    res.status(200).json({
-                        status: 'success',
-                        data: result
-                    });
-                } else {
-                    res.json(false)
-                }
-            })
-        } catch (error) {
-            res.status(500).send('error :' + error)
-        }
+        // });
     }
     //Delete
     static async delete(req, res) {
-        try {
-            const { productID } = req.body
-            await Post.deleteOne({ productID }, async (err, result) => {
-                if (result || !err) {
-                    res.json(result)
-                } else {
-                    res.json(false)
-                }
-            })
-        } catch (error) {
-            res.send('error :' + error)
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const { productID } = req.body
+                await Product.deleteOne({ productID }, async (err, result) => {
+                    if (result || !err) {
+                        res.json(result)
+                    } else {
+                        res.json(false)
+                    }
+                })
+            } catch (error) {
+                res.send('error :' + error)
+            }
+        // });
     }
     //Delete Status
     // static async deletestatus(req, res) {
@@ -195,6 +167,4 @@ class TestServices {
     //     }
     // }
 }
-module.exports = {
-    TestServices
-}
+module.exports = ProductServices

@@ -5,19 +5,16 @@ cloudinary.config({
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET,
 })
-
-exports.upload = (file) => {
+exports.uploads = (file, folder) => {
     return new Promise(resolve => {
         cloudinary.uploader.upload(file, (result) => {
-            resolve({ url: result.url, id: result.public_id })
-        }, { resource_type: "auto" })
-    })
-}
-
-exports.delete = (publishId) => {
-    return new Promise(resolve => {
-        cloudinary.uploader.destroy(publishId, result =>{
-            resolve(result)
+            resolve({
+                url: result.url,
+                id: result.public_id
+            })
+        }, {
+            resource_type: "auto",
+            folder: folder
         })
     })
 }

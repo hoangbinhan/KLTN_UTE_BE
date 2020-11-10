@@ -9,6 +9,11 @@ const ProductSchema = mongoose.Schema({
         type : String,
         required : true
     },
+<<<<<<< HEAD
+    images : {
+        type : Array,
+        required : true
+=======
     description:{
         type: String,
         required:true
@@ -42,6 +47,7 @@ const ProductSchema = mongoose.Schema({
     },
     detailConfiguration:{
         type: Array
+>>>>>>> develop
     },
     picture: {
         type: Array,

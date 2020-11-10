@@ -1,86 +1,97 @@
-const Post = require('../models/orders.model');
+const Order = require('../models/orders.model');
 const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function')
+const BaseAPI = require('../common/token');
 
- class TestServices {
+class OrderServices {
     //
     static async get(req, res) {
-        try {
-            const payload = await Post.find()
-            res.json(payload)
-        } catch (err) {
-            res.json({ message: err })
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const payload = await Order.find()
+                res.json(payload)
+            } catch (err) {
+                res.json({ message: err })
+            }
+        // });
     }
     //
     static async getById(req, res) {
-        try {
-            const payload = await Post.findOne({ orderID: req.params.id })
-            res.json(payload)
-        } catch (err) {
-            res.json({ message: err });
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const payload = await Order.findOne({ orderID: req.params.id })
+                res.json(payload)
+            } catch (err) {
+                res.json({ message: err });
+            }
+        // });
     }
     //
     static async create(req, res) {
-        const post = new Post({
-            orderID : service.generateID('orderID'),
-            // orderID: req.body.orderID,
-            customerID: req.body.customerID,
-            employeeID: req.body.employeeID,
-            orderDate: req.body.orderDate,
-            purchaseOrderNumber: req.body.purchaseOrderNumber,
-            shipName: req.body.shipName,
-            shipAddress: req.body.shipAddress,
-            shipCity: req.body.shipCity,
-            shipStateOrProvince: req.body.shipStateOrProvince,
-            shipPostalCode: req.body.shipPostalCode,
-            shipCountry: req.body.shipCountry,
-            shipPhoneNumber: req.body.shipPhoneNumber,
-            shipDate: req.body.shipDate,
-            shippingMethodID: req.body.shippingMethodID,
-            freightCharge: req.body.freightCharge,
-            salesTaxRate: req.body.salesTaxRate
-        });
-        try {
-            const savePost = await post.save();
-            res.json(savePost);
-        } catch (err) {
-            res.json({ message: err });
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            const post = new Order({
+                orderID: service.generateID('orderID'),
+                // orderID: req.body.orderID,
+                customerID: req.body.customerID,
+                employeeID: req.body.employeeID,
+                orderDate: req.body.orderDate,
+                purchaseOrderNumber: req.body.purchaseOrderNumber,
+                shipName: req.body.shipName,
+                shipAddress: req.body.shipAddress,
+                shipCity: req.body.shipCity,
+                shipStateOrProvince: req.body.shipStateOrProvince,
+                shipPostalCode: req.body.shipPostalCode,
+                shipCountry: req.body.shipCountry,
+                shipPhoneNumber: req.body.shipPhoneNumber,
+                shipDate: req.body.shipDate,
+                shippingMethodID: req.body.shippingMethodID,
+                freightCharge: req.body.freightCharge,
+                salesTaxRate: req.body.salesTaxRate
+            });
+            try {
+                const savePost = await post.save();
+                res.json(savePost);
+            } catch (err) {
+                res.json({ message: err });
+            }
+        // });
     }
     //Edit
     static async update(req, res) {
-        try {
-            const { orderID } = req.body
-            const updateField = service.genUpdate(req.body,
-                ['orderDate', 'purchaseOrderNumber', 'shipName', 'shipAddress', 'shipCity', 
-                'shipStateOrProvince', 'shipPostalCode', 'shipCountry', 'shipPhoneNumber', 'shipDate', 'freightCharge', 'salesTaxRate', 'status'])
-            await Post.findOneAndUpdate({ orderID }, updateField, { new: true }, (err, result) => {
-                if (result || !err) {
-                    res.json(result)
-                } else {
-                    res.json(false)
-                }
-            })
-        } catch (error) {
-            res.status(500).send('error :' + error)
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const { orderID } = req.body
+                const updateField = service.genUpdate(req.body,
+                    ['orderDate', 'purchaseOrderNumber', 'shipName', 'shipAddress', 'shipCity',
+                        'shipStateOrProvince', 'shipPostalCode', 'shipCountry', 'shipPhoneNumber', 'shipDate', 'freightCharge', 'salesTaxRate', 'status'])
+                await Order.findOneAndUpdate({ orderID }, updateField, { new: true }, (err, result) => {
+                    if (result || !err) {
+                        res.json(result)
+                    } else {
+                        res.json(false)
+                    }
+                })
+            } catch (error) {
+                res.status(500).send('error :' + error)
+            }
+        // });
     }
     //Delete
     static async delete(req, res) {
-        try {
-            const { orderID } = req.body
-            await Post.deleteOne({ orderID }, async (err, result) => {
-                if (result || !err) {
-                    res.json(result)
-                } else {
-                    res.json(false)
-                }
-            })
-        } catch (error) {
-            res.send('error :' + error)
-        }
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            try {
+                const { orderID } = req.body
+                await Order.deleteOne({ orderID }, async (err, result) => {
+                    if (result || !err) {
+                        res.json(result)
+                    } else {
+                        res.json(false)
+                    }
+                })
+            } catch (error) {
+                res.send('error :' + error)
+            }
+        // });
     }
     //Delete Status
     // static async deletestatus(req, res) {
@@ -96,6 +107,4 @@ const service = require('../common/function')
     //     }
     // }
 }
-module.exports = { 
-    TestServices
-}
+module.exports = OrderServices
