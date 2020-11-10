@@ -7,11 +7,10 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         cb(null, new Date().toISOString() + '-' + file.originalname)
     }
-})
-
+});
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    if (file.mimetype == "image/bmp" || file.mimetype == "image/png" || file.mimetype == "image/jpeg" || file.mimetype == "image/jpg" || file.mimetype == "image/gif") {
         cb(null, true)
     } else {
         //reject file
