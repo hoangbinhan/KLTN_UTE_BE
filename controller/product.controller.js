@@ -2,6 +2,7 @@ const Product = require('../models/products.model');
 // const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function');
 const BaseAPI = require('../common/token');
+const cloud = require('../common/cloudinaryConfig');
 
 
 class APIfeatures {
@@ -92,13 +93,20 @@ class ProductServices {
     }
     // Multer IMG
     static async create(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
-
+            let listImage = []
+            const images =  await cloud.upload(req.body.picture[0])
+            const temp = {imageUrl: result.url,imageId: result.id}
+            listImage.push(temp)
             var post = new Product({
-                productID: service.generateID('productID'),
-                productName: req.body.productName,
-                images: req.body.images,
-                unitPrice: req.body.unitPrice
+                productName: req.body.productName, 
+                description: req.body.description,
+                quantity: req.body.quantity,
+                price: req.body.price,
+                discountPrice: req.body.discountPrice,
+                guarantee: req.body.guarantee,
+                category: req.body.category,
+                status: req.body.status,
+                image: listImage
             });
             try {
                 const savePost = await post.save();

@@ -1,19 +1,9 @@
 const mongoose = require('mongoose');
 const ProductSchema = mongoose.Schema({
-    productID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
     productName : {
         type : String,
         required : true
     },
-<<<<<<< HEAD
-    images : {
-        type : Array,
-        required : true
-=======
     description:{
         type: String,
         required:true
@@ -34,24 +24,16 @@ const ProductSchema = mongoose.Schema({
         type: Number,
         required: true
     },
+    category:{
+        type: String
+    },
     status: {
         type: String, 
         required: true
     },
     image : {
-        type : String,
+        type : Array,
         required : true
-    },
-    detailDescription:{
-        type : String,
-    },
-    detailConfiguration:{
-        type: Array
->>>>>>> develop
-    },
-    picture: {
-        type: Array,
-        required: true
     },
 });
 module.exports = mongoose.model('Products', ProductSchema);
