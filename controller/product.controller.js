@@ -1,4 +1,5 @@
 const Product = require('../models/products.model');
+const Categories = require('../models/categories.model')
 // const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function');
 const BaseAPI = require('../common/token');
@@ -12,7 +13,6 @@ class APIfeatures {
     }
     filtering() {
         const queryObj = { ...this.queryString };
-        console.log(queryObj);
         const excludedfields = ['page', 'sort', 'limit'];
         excludedfields.forEach(el => delete queryObj[el]);
         let querystr = JSON.stringify(queryObj);
@@ -51,7 +51,28 @@ class ProductServices {
     static async get(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const features = new APIfeatures(Product.find(), req.query)
+                // const features = new APIfeatures(Product.find(), req.query)
+                //     .filtering()
+                //     .sorting()
+                //     .paginating();
+                // const payload = await features.query;
+                // res.status(200).json({
+                //     status: 'success',
+                //     result: payload.length,
+                //     data: {
+                //         payload
+                //     }
+                // });
+                const features = new APIfeatures(Product.aggregate([
+                    {$lookup:{
+                        from: 'categories',
+                        localField: 'category',
+                        foreignField: '_id',
+                        as: 'model'
+                    }}
+                ], function(req,res){
+                    return res.json()
+                }), req.query)
                     .filtering()
                     .sorting()
                     .paginating();
@@ -94,7 +115,7 @@ class ProductServices {
     // Multer IMG
     static async create(req, res) {
             let listImage = []
-            const images =  await cloud.upload(req.body.picture[0])
+            const result =  await cloud.uploads(req.body.picture[0].thumbUrl)
             const temp = {imageUrl: result.url,imageId: result.id}
             listImage.push(temp)
             var post = new Product({

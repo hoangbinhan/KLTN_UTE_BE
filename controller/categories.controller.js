@@ -87,7 +87,7 @@ class TestServices {
 
     // Multer IMG
     static async uploadIMG(req, res) {
-        const result = await cloud.upload(req.body.upload[0].thumbUrl)
+        const result = await cloud.uploads(req.body.upload[0].thumbUrl)
         var post = new Post({
             // categoryID: service.generateID('categoryID'),
             categoryName: req.body.categoryName,
