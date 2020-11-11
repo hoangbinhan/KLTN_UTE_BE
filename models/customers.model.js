@@ -16,6 +16,10 @@ const CustomerSchema = mongoose.Schema({
     email:{
         type: String
     },
+    address:{
+        type: String,
+        required: true
+    },
     invoices:{
         type: [mongoose.Schema.Types.ObjectId]
     }

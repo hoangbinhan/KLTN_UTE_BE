@@ -29,12 +29,13 @@ class CustomerServices {
     //
     static async create(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
-            const {phoneNumber, firstName, lastName, email} = req.body
+            const {phoneNumber, firstName, lastName, email, address} = req.body
             const post = new Customer({
                 phoneNumber, 
                 firstName, 
                 lastName, 
-                email
+                email,
+                address
             });
             try {
                 const savePost = await post.save();
@@ -65,8 +66,8 @@ class CustomerServices {
     static async delete(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const { _id } = req.body
-                await Customer.deleteOne({ _id }, async (err, result) => {
+                const { customerID } = req.body
+                await Customer.deleteOne({ _id: customerID }, async (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {
@@ -78,18 +79,5 @@ class CustomerServices {
             }
         // });
     }
-    //Delete Status
-    // static async deletestatus(req, res) {
-    //     try {
-    //         const id = req.params.id
-    //         const payload = await Post.findOneAndUpdate({ id }, { status: 'INACTIVE' })
-    //         if (!payload) {
-    //             return res.json(false)
-    //         }
-    //         res.json(payload)
-    //     } catch (error) {
-    //         res.send('error :' + error)
-    //     }
-    // }
 }
 module.exports = CustomerServices
