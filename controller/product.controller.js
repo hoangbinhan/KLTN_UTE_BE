@@ -1,7 +1,9 @@
 const Product = require('../models/products.model');
+const Categories = require('../models/categories.model')
 // const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function');
 const BaseAPI = require('../common/token');
+const cloud = require('../common/cloudinaryConfig');
 
 
 class APIfeatures {
@@ -11,7 +13,6 @@ class APIfeatures {
     }
     filtering() {
         const queryObj = { ...this.queryString };
-        console.log(queryObj);
         const excludedfields = ['page', 'sort', 'limit'];
         excludedfields.forEach(el => delete queryObj[el]);
         let querystr = JSON.stringify(queryObj);
@@ -48,20 +49,23 @@ class ProductServices {
     }
     //GetALL
     static async get(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const features = new APIfeatures(Product.find(), req.query)
-                    .filtering()
-                    .sorting()
-                    .paginating();
-                const payload = await features.query;
-                res.status(200).json({
-                    status: 'success',
-                    result: payload.length,
-                    data: {
-                        payload
-                    }
-                });
+                Product.aggregate([
+                    {$lookup:{
+                        from: 'categories',
+                        localField: 'category',
+                        foreignField: '_id',
+                        as: 'model'
+                    }}
+                ]).exec(function(err, data){
+                    if(err)return
+                    return res.status(200).json({
+                        status:'success',
+                        result: data.length,
+                        data
+                    })
+                })
+
             } catch (err) {
                 res.status(400).json({
                     status: 'fail',
@@ -74,7 +78,7 @@ class ProductServices {
     static async getById(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const payload = await Product.findOne({ productID: req.params.id })
+                const payload = await Product.findOne({ _id: req.params.id })
                 res.status(200).json({
                     status: 'success',
                     result: payload.length,
@@ -92,13 +96,20 @@ class ProductServices {
     }
     // Multer IMG
     static async create(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
-
+            let listImage = []
+            const result =  await cloud.uploads(req.body.picture[0].thumbUrl)
+            const temp = {imageUrl: result.url,imageId: result.id}
+            listImage.push(temp)
             var post = new Product({
-                productID: service.generateID('productID'),
-                productName: req.body.productName,
-                images: req.body.images,
-                unitPrice: req.body.unitPrice
+                productName: req.body.productName, 
+                description: req.body.description,
+                quantity: req.body.quantity,
+                price: req.body.price,
+                discountPrice: req.body.discountPrice,
+                guarantee: req.body.guarantee,
+                category: req.body.category,
+                status: req.body.status,
+                image: listImage
             });
             try {
                 const savePost = await post.save();
@@ -119,9 +130,7 @@ class ProductServices {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
                 const { productID } = req.body
-                const updateField = service.genUpdate(req.body,
-                    ['productName', 'unitPrice', 'status', 'images'])
-                await Product.findOneAndUpdate({ productID }, updateField, { new: true }, (err, result) => {
+                await Product.findOneAndUpdate({ productID }, req.body, { new: true }, (err, result) => {
                     if (result || !err) {
                         res.status(200).json({
                             status: 'success',
@@ -141,7 +150,7 @@ class ProductServices {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
                 const { productID } = req.body
-                await Product.deleteOne({ productID }, async (err, result) => {
+                await Product.deleteOne({ _id:productID }, async (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {

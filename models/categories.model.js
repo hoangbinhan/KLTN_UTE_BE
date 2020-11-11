@@ -17,9 +17,6 @@ const CategorySchema = mongoose.Schema({
         type : Number,
         required : true
     },
-    children:{
-        type: [{type:mongoose.Schema.Types.ObjectId}],
-    },
     status:{
         type: String,
         default: 'ACTIVE'
