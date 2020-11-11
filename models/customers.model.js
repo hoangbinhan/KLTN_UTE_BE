@@ -1,49 +1,23 @@
 const mongoose = require('mongoose');
 const CustomerSchema = mongoose.Schema({
-    customerID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
-    companyName : {
-        type : String,
-        required : true
-    },
-    contactFirstname : {
-        type : String,
-        required : true
-    },
-    contactLastname : {
-        type : String,
-        required : true
-    },
-    billingAddress : {
-        type : String,
-    },
-    city : {
-        type : String,
-    },
-    stateOrProvince : {
-        type : String,
-    },
-    postalCode : {
-        type : String,
-    },
-    country : {
-        type : String,
-    },
-    contactTitle : {
-        type : String,
-    },
-    phoneNumber : {
-        type : String,
-    },
-    faxNumber : {
-        type : String,
-    },
-    status:{
+    phoneNumber: {
         type: String,
-        default: 'ACTIVE'
+        unique: true,
+        required: true
+    },
+    firstName: {
+        type: String,
+        required:true
+    },
+    lastName: {
+        type: String,
+        required:true
+    },
+    email:{
+        type: String
+    },
+    invoices:{
+        type: [mongoose.Schema.Types.ObjectId]
     }
 });
 module.exports = mongoose.model('Customers', CustomerSchema);
