@@ -130,9 +130,7 @@ class ProductServices {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
                 const { productID } = req.body
-                const updateField = service.genUpdate(req.body,
-                    ['productName', 'unitPrice', 'status', 'images'])
-                await Product.findOneAndUpdate({ productID }, updateField, { new: true }, (err, result) => {
+                await Product.findOneAndUpdate({ productID }, req.body, { new: true }, (err, result) => {
                     if (result || !err) {
                         res.status(200).json({
                             status: 'success',
@@ -152,7 +150,7 @@ class ProductServices {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
                 const { productID } = req.body
-                await Product.deleteOne({ productID }, async (err, result) => {
+                await Product.deleteOne({ _id:productID }, async (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {

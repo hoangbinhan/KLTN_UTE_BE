@@ -154,8 +154,9 @@ class TestServices {
     //Delete
     static async delete(req, res) {
         try {
-            const { productID } = req.body
-            await Post.deleteOne({ productID }, async (err, result) => {
+            const { categoryID } = req.body
+            console.log(categoryID);
+            await Post.deleteOne({ _id: categoryID }, async (err, result) => {
                 if (result || !err) {
                     res.json(result)
                 } else {
