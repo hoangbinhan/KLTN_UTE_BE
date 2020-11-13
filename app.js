@@ -60,7 +60,7 @@ app.use('/api/order', orderrouter);
 app.use('/api/payment_method', payment_methodrouter);
 app.use('/api/payment', paymentrouter);
 app.use('/api/products', productrouter);
-app.use('/api/shipping_method', shipping_methodrouter);
+app.use('/api/shipping_methods', shipping_methodrouter);
 app.use('/api/upload', uploadImage)
 app.use('/api/user', user);
 //

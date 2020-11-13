@@ -15,7 +15,6 @@ class ShippingServices {
             }
         // });
     }
-    //
     static async getById(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
@@ -29,10 +28,11 @@ class ShippingServices {
     //
     static async create(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
+            let {shippingMethod, shippingFee, status} = req.body
             const post = new Shipping({
-                shippingMethodID: service.generateID('shippingMethodID'),
-                // shippingMethodID: req.body.shippingMethodID,
-                shippingMethod: req.body.shippingMethod
+                shippingMethod,
+                shippingFee,
+                status
             });
             try {
                 const savePost = await post.save();
@@ -46,10 +46,8 @@ class ShippingServices {
     static async update(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const { shippingMethodID } = req.body
-                const updateField = service.genUpdate(req.body,
-                    ['shippingMethod', 'status'])
-                await Shipping.findOneAndUpdate({ shippingMethodID }, updateField, { new: true }, (err, result) => {
+                const { _id } = req.body
+                await Shipping.findOneAndUpdate({ _id }, req.body, { new: true }, (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {
@@ -65,8 +63,8 @@ class ShippingServices {
     static async delete(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const { shippingMethodID } = req.body
-                await Shipping.deleteOne({ shippingMethodID }, async (err, result) => {
+                const { _id } = req.body
+                await Shipping.deleteOne({ _id }, async (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {
@@ -78,18 +76,5 @@ class ShippingServices {
             }
         // });
     }
-    //Delete Status
-    // static async deletestatus(req, res) {
-    //     try {
-    //         const id = req.params.id
-    //         const payload = await Post.findOneAndUpdate({ id }, { status: 'INACTIVE' })
-    //         if (!payload) {
-    //             return res.json(false)
-    //         }
-    //         res.json(payload)
-    //     } catch (error) {
-    //         res.send('error :' + error)
-    //     }
-    // }
 }
 module.exports = ShippingServices
