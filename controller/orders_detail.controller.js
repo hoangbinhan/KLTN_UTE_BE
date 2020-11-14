@@ -1,7 +1,6 @@
 const Order_detail = require('../models/orders_detail.model');
 const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function')
-const BaseAPI = require('../common/token');
 
 class Order_detailServices {
     static async get(req, res) {

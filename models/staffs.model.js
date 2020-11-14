@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const constant = require('../common/constants');
-const  UserSchema = mongoose.Schema({
-    userID : {
+const  StaffSchema = mongoose.Schema({
+    staffID : {
         type : String,
         required : true
     },
@@ -22,7 +22,7 @@ const  UserSchema = mongoose.Schema({
     },
     role : {
         type : String,
-        default : constant.userRole.member
+        default : constant.userRole.staff
     }, 
     avatar : {
         type : String
@@ -32,4 +32,4 @@ const  UserSchema = mongoose.Schema({
         default: 'ACTIVE'
     }
 });
-module.exports = mongoose.model('users',UserSchema);
+module.exports = mongoose.model('staffs',StaffSchema);

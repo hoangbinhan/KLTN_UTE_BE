@@ -10,7 +10,7 @@ class APIfeatures {
     }
 }
 
-class TestServices {
+class ChildrebServices {
     static async addNew(req,res){
         console.log('req.body', req.body)
         let post = new Post({
@@ -39,4 +39,4 @@ class TestServices {
     }
 }
 
-module.exports = {TestServices}
+module.exports = ChildrebServices
