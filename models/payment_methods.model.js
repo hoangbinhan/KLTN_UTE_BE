@@ -4,10 +4,6 @@ const PaymentMethodSchema = mongoose.Schema({
         type : String,
         required : true
     },
-    creditCard : {
-        type : String,
-        required : true
-    },
     status:{
         type: String,
         default: 'ACTIVE'

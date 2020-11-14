@@ -30,10 +30,8 @@ class Payment_methodServices {
     static async create(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             const post = new Payment_method({
-                paymentMethodID: service.generateID('paymentMethodID'),
-                // paymentMethodID: req.body.paymentMethodID,
                 paymentMethod: req.body.paymentMethod,
-                creditCard: req.body.creditCard
+                creditCard: req.body.status
             });
             try {
                 const savePost = await post.save();
@@ -47,10 +45,8 @@ class Payment_methodServices {
     static async update(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const { paymentMethodID } = req.body
-                const updateField = service.genUpdate(req.body,
-                    ['paymentMethod', 'creditCard', 'status'])
-                await Payment_method.findOneAndUpdate({ paymentMethodID }, updateField, { new: true }, (err, result) => {
+                const { _id } = req.body
+                await Payment_method.findOneAndUpdate({ _id }, req.body, { new: true }, (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {
@@ -66,8 +62,8 @@ class Payment_methodServices {
     static async delete(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const { paymentMethodID } = req.body
-                await Payment_method.deleteOne({ paymentMethodID }, async (err, result) => {
+                const { _id } = req.body
+                await Payment_method.deleteOne({ _id }, async (err, result) => {
                     if (result || !err) {
                         res.json(result)
                     } else {
@@ -79,18 +75,5 @@ class Payment_methodServices {
             }
         // });
     }
-    //Delete Status
-    // static async deletestatus(req, res) {
-    //     try {
-    //         const id = req.params.id
-    //         const payload = await Post.findOneAndUpdate({ id }, { status: 'INACTIVE' })
-    //         if (!payload) {
-    //             return res.json(false)
-    //         }
-    //         res.json(payload)
-    //     } catch (error) {
-    //         res.send('error :' + error)
-    //     }
-    // }
 }
 module.exports = Payment_methodServices

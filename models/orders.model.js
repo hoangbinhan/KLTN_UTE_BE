@@ -1,65 +1,27 @@
 const mongoose = require('mongoose');
 const OrderSchema = mongoose.Schema({
-    orderID : {
-        type : String,
-        required : true,
-        // default: ''
+    customer: {
+        type: mongoose.Types.ObjectId,
+        required: true
     },
-    customerID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
-    employeeID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
-    orderDate : {
-        type : Date,
-        required : true
-    },
-    purchaseOrderNumber : {
-        type : String,
-        required : true
-    },
-    shipName : {
-        type : String,
-        required : true
-    },
-    shipAddress : {
-        type : String,
-    },
-    shipCity : {
-        type : String,
-    },
-    shipStateOrProvince : {
-        type : String,
-    },
-    shipPostalCode : {
-        type : String,
-    },
-    shipCountry : {
-        type : String,
-    },
-    shipPhoneNumber : {
-        type : String,
-    },
-    shipDate : {
-        type : String,
-    },
-    shippingMethodID : {
-        type : String,
-    },
-    freightCharge : {
-        type : String,
-    },
-    salesTaxRate : {
-        type : String,
-    },
-    status:{
+    status: {
         type: String,
-        default: 'PENDING'
+        required: true
+    },
+    total: {
+        type: String,
+        required: true
+    },
+    dateAdded: {
+        type: Date,
+        default: Date.now
+    },
+    dateModified:{
+        type: Date,
+        default: Date.now
+    },
+    createBy:{
+        type: mongoose.Types.ObjectId,
     }
 });
 module.exports = mongoose.model('Orders', OrderSchema);

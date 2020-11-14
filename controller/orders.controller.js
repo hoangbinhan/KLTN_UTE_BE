@@ -29,24 +29,12 @@ class OrderServices {
     //
     static async create(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
+            const {customer, status, total, createBy} = req.body
             const post = new Order({
-                orderID: service.generateID('orderID'),
-                // orderID: req.body.orderID,
-                customerID: req.body.customerID,
-                employeeID: req.body.employeeID,
-                orderDate: req.body.orderDate,
-                purchaseOrderNumber: req.body.purchaseOrderNumber,
-                shipName: req.body.shipName,
-                shipAddress: req.body.shipAddress,
-                shipCity: req.body.shipCity,
-                shipStateOrProvince: req.body.shipStateOrProvince,
-                shipPostalCode: req.body.shipPostalCode,
-                shipCountry: req.body.shipCountry,
-                shipPhoneNumber: req.body.shipPhoneNumber,
-                shipDate: req.body.shipDate,
-                shippingMethodID: req.body.shippingMethodID,
-                freightCharge: req.body.freightCharge,
-                salesTaxRate: req.body.salesTaxRate
+               customer,
+               status,
+               total,
+               createBy
             });
             try {
                 const savePost = await post.save();
