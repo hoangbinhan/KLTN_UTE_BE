@@ -1,8 +1,6 @@
 const Product = require('../models/products.model');
 const Categories = require('../models/categories.model')
 // const STATUS_TYPE = require('../common/constants').statusActive
-const service = require('../common/function');
-const BaseAPI = require('../common/token');
 const cloud = require('../common/cloudinaryConfig');
 
 
@@ -65,7 +63,6 @@ class ProductServices {
                         data
                     })
                 })
-
             } catch (err) {
                 res.status(400).json({
                     status: 'fail',

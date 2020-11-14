@@ -7,29 +7,29 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: 'http://192.168.0.106:3000',
   optionsSuccessStatus: 200
 }
 
 //require dotenv
 const dotenv = require('dotenv');
 
-
-
 dotenv.config();
 // setup express
 const app = express()
 
 app.use(express.json())
-app.use(bodyParser.json())
+// app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.static("public"))
 
+// app.use(cors())
 app.use(cors())
 app.use(cookieParser())
 app.use(fileUpload({
     useTempFiles: true
 }))
-
 
 // Import Router
 const customersrouter = require('./routes/customers.route');
@@ -41,16 +41,17 @@ const paymentrouter = require('./routes/payments.route');
 const productrouter = require('./routes/products.route');
 const shipping_methodrouter = require('./routes/shipping_methods.route');
 const uploadImage = require('./routes/upload.route');
-const user = require('./routes/users.route');
 //
 const categoriesrouter = require('./routes/categories.route')
 const children_category = require('./routes/children_category.route')
+const staff = require('./routes/staffs_account.route');
 //
 app.use(cors(corsOptions))
 app.use(bodyParser.json({limit: '50mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '50mb',parameterLimit: 100000, extended: true}));
 app.use(express.static("public"));
 
+// const uploadImage = require('./routes/upload.route');
 
 
 app.use('/api/customers', customersrouter);
@@ -62,7 +63,7 @@ app.use('/api/payment', paymentrouter);
 app.use('/api/products', productrouter);
 app.use('/api/shipping_methods', shipping_methodrouter);
 app.use('/api/upload', uploadImage)
-app.use('/api/user', user);
+app.use('/api/staff', staff);
 //
 
 app.use('/api/categories', categoriesrouter)
@@ -88,4 +89,5 @@ mongoose.connect(process.env.MONGO_URL, {
   }).catch((err) => {
     console.log(err)
   })
+
 // End connnect

@@ -37,7 +37,7 @@ class APIfeatures {
         return this;
     }
 }
-class TestServices {
+class CategoriesServices {
     //Search
     static async search(req, res) {
         var regex = new RegExp(req.params.productName, 'i');
@@ -180,7 +180,6 @@ class TestServices {
     //         res.send('error :' + error)
     //     }
     // }
+    
 }
-module.exports = {
-    TestServices
-}
+module.exports = CategoriesServices

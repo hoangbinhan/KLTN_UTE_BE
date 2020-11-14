@@ -1,4 +1,3 @@
-const service = require('../common/function')
 const cloudinary = require('../common/cloudinaryConfig')
 const fs = require('fs');
 const path = require('path');

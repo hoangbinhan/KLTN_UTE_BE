@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const TestServices = require('../controller/children_category.controller')
+const ChildrebServices = require('../controller/children_category.controller')
 
-router.post('/', TestServices.TestServices.addNew)
+router.post('/', ChildrebServices.addNew)
 
 module.exports = router

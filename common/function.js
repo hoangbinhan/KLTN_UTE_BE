@@ -4,18 +4,18 @@ const crypto = require('crypto-js');
 const verifyToken = (token) => {
     return jwt.verify(token, process.env.SECRET_TOKEN, (err) => !err)
 }
-const decodeToken = (token) => {
-    const decodeString = jwt.decode(token)
-    return decodeString ? decodeString.id : null
-}
-const lowerCase = (value) => {
-    return value ? value.toLowerCase() : value
-}
-const convertPasswordHMAC256 = (password) => {
-  var hashPassword = crypto.HmacSHA256(password, process.env.SECRET_TOKEN)
-  var hexhash = crypto.enc.Hex.stringify(hashPassword)
-  return hexhash
-}
+// const decodeToken = (token) => {
+//     const decodeString = jwt.decode(token)
+//     return decodeString ? decodeString.id : null
+// }
+// const lowerCase = (value) => {
+//     return value ? value.toLowerCase() : value
+// }
+// const convertPasswordHMAC256 = (password) => {
+//   var hashPassword = crypto.HmacSHA256(password, process.env.SECRET_TOKEN)
+//   var hexhash = crypto.enc.Hex.stringify(hashPassword)
+//   return hexhash
+// }
 function generateID (name) { 
     return name +'_' + Math.random().toString(36).substr(2, 9);
 }
@@ -28,9 +28,9 @@ const fetchAPI = async (apiurl, headers) => {
     return false
   }
 }
-const generateToken = (userSign) => {
-  return jwt.sign({ userID: userSign }, process.env.SECRET_TOKEN)
-}
+// const generateToken = (userSign) => {
+//   return jwt.sign({ userID: userSign }, process.env.SECRET_TOKEN)
+// }
 const genUpdate = (data, arrValue) => {
     const genObject = {}
     arrValue.map(itm => {
@@ -58,11 +58,11 @@ module.exports = {
     generateID,
     genUpdate,
     verifyToken, 
-    decodeToken, 
-    lowerCase,
-    convertPasswordHMAC256,
+    // decodeToken, 
+    // lowerCase,
+    // convertPasswordHMAC256,
     fetchAPI,
-    generateToken,
+    // generateToken,
     validateEmail,
     createActivationToken,
     createAccessToken,
