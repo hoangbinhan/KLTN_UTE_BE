@@ -6,7 +6,7 @@ const OrderSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        required: true
+        default: 'PENDING'
     },
     total: {
         type: String,

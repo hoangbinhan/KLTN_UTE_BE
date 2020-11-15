@@ -48,6 +48,7 @@ class CategoriesServices {
     //GetALL
     static async get(req, res) {
         try {
+            const {text} = req.params
             const features = new APIfeatures(Post.find(), req.query)
                 .filtering()
                 .sorting()

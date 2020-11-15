@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 
 const corsOptions = {
-  origin: 'http://192.168.0.106:3000',
+  origin: 'http://localhost:3000',
   optionsSuccessStatus: 200
 }
 

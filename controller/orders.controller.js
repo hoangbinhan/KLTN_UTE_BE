@@ -1,4 +1,5 @@
 const Order = require('../models/orders.model');
+const Customer = require('../models/customers.model')
 const STATUS_TYPE = require('../common/constants').statusActive
 const service = require('../common/function')
 
@@ -28,19 +29,44 @@ class OrderServices {
     //
     static async create(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
-            const {customer, status, total, createBy} = req.body
-            const post = new Order({
-               customer,
-               status,
-               total,
-               createBy
-            });
-            try {
-                const savePost = await post.save();
-                res.json(savePost);
-            } catch (err) {
-                res.json({ message: err });
-            }
+            const {customerDetail} = req.body
+            await Customer.findOne({phoneNumber: customerDetail.phoneNumber}, async function(err, customer){
+                if(err){
+                    console.log(err);
+                }else{
+                    if(customer){
+                        console.log(customer);
+                    }
+                    else{
+                        const post = new Customer({
+                            phoneNumber:customerDetail.phoneNumber, 
+                            firstName:customerDetail.firstName, 
+                            lastName:customerDetail.lastName, 
+                            email:customerDetail.email,
+                            address:customerDetail.address
+                        })
+                        try {
+                            await post.save();
+                        } catch (err) {
+                            res.json({ message: err });
+                        }
+                    }
+                }
+            })
+            
+            // const post = new Order({
+            //    customer,
+            //    status,
+            //    total,
+            //    createBy
+            // });
+            // try {
+            //     const savePost = await post.save();
+            //     res.json(savePost);
+            // } catch (err) {
+            //     res.json({ message: err });
+            // }
+
         // });
     }
     //Edit
