@@ -35,7 +35,7 @@ class OrderServices {
             var idCustomer = ''
             await Customer.findOne({phoneNumber: customerDetail.phoneNumber}, async function(err, customer){
                 if(err){
-                    console.log(err);
+                    res.status(400).json({message: err.message})
                 }else{
                     if(customer){
                         idCustomer =  customer._id
@@ -45,23 +45,25 @@ class OrderServices {
                         })
                         await postOrder.save((err)=>{
                             if(err){
-                                res.json({err: err.message, postSave: 'err in postSave'})
+                                res.status(400).json({err: err.message, postSave: 'err in postSave'})
                             }else{
                                 Customer.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
                                     if(err){
-                                        res.json({err:err.message})
+                                        res.status(400).json({err:err.message})
                                     }else{
                                         try{
                                             for(let i = 0;i<productsInvoice.length;i++){
                                                 const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
-                                                const isSoldOut = storedProduct.quantity - productsInvoice[i].quantity
+                                                const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
                                                 if(isSoldOut<0){
-                                                    res.json({message: 'product is sold out!'})
+                                                    res.status(400).json({message: 'product is sold out!'})
                                                 }
-                                                try{
-                                                    await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
-                                                }catch(err){
-                                                    res.json({message: err.message})
+                                                else{
+                                                    try{
+                                                        await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
+                                                    }catch(err){
+                                                        res.status(400).json({message: err.message})
+                                                    }
                                                 }
                                             }
                                             try{
@@ -73,12 +75,12 @@ class OrderServices {
                                                     totalDetail
                                                 })
                                                 await postDetail.save()
-                                                res.json({message:'successful'})
+                                                res.status(200).json({message:'successful'})
                                             }catch(err){
-                                                res.json({message: err.message})
+                                                res.status(400).json({message: err.message})
                                             }
                                         }catch(err){
-                                            res.json({message: err.message})
+                                            res.status(400).json({message: err.message})
                                         }
                                     }
                                 })
@@ -95,7 +97,7 @@ class OrderServices {
                         })
                         try {
                             post.save(async (err)=>{
-                                if(err) res.json({message: err.message})
+                                if(err) res.status(400).json({message: err.message})
                                 idCustomer = post._id
                                 const postOrder = new Order({
                                     customer: idCustomer,
@@ -103,23 +105,25 @@ class OrderServices {
                                 })
                                 await postOrder.save((err)=>{
                                     if(err){
-                                        res.json({err: err.message, postSave: 'err in postSave'})
+                                        res.status(400).json({err: err.message, postSave: 'err in postSave'})
                                     }else{
                                         Customer.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
                                             if(err){
-                                                res.json({err:err.message})
+                                                res.status(400).json({err:err.message})
                                             }else{
                                                 try{
                                                     for(let i = 0;i<productsInvoice.length;i++){
                                                         const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
-                                                        const isSoldOut = storedProduct.quantity - productsInvoice[i].quantity
+                                                        const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
                                                         if(isSoldOut<0){
-                                                            res.json({message: 'product is sold out!'})
+                                                            res.status(400).json({message: 'product is sold out!'})
                                                         }
-                                                        try{
-                                                            await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
-                                                        }catch(err){
-                                                            res.json({message: err.message})
+                                                        else{
+                                                            try{
+                                                                await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
+                                                            }catch(err){
+                                                                res.status(400).json({message: err.message})
+                                                            }
                                                         }
                                                     }
                                                     try{
@@ -131,12 +135,12 @@ class OrderServices {
                                                             totalDetail
                                                         })
                                                         await postDetail.save()
-                                                        res.json({message:'successful'})
+                                                        res.status(200).json({message:'successful'})
                                                     }catch(err){
-                                                        res.json({message: err.message})
+                                                        res.status(400).json({message: err.message})
                                                     }
                                                 }catch(err){
-                                                    res.json({message: err.message})
+                                                    res.status(400).json({message: err.message})
                                                 }
                                             }
                                         })
@@ -144,7 +148,7 @@ class OrderServices {
                                 })
                             });
                         } catch (err) {
-                            res.json({ message: err });
+                            res.status(400).json({ message: err });
                         }
                     }
                 }
