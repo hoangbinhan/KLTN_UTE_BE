@@ -8,20 +8,34 @@ const service = require('../common/function')
 class OrderServices {
     //
     static async get(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
-            try {
-                const payload = await Order.find()
-                res.json(payload)
-            } catch (err) {
-                res.json({ message: err })
-            }
-        // });
+        try{
+            Order.aggregate([
+                {
+                    $lookup:{
+                        from: 'customers',
+                        localField: 'customer',
+                        foreignField: '_id',
+                        as: 'customerDetail'
+                    }
+                }
+            ]).exec(function(err, data){
+                if(err) res.status(400).json({message: err.message})
+                return res.status(200).json({
+                    data
+                })
+            })
+        }catch(err){
+            res.status(400).json({
+                status:'fail',
+                message: err.message
+            })
+        }
     }
     //
     static async getById(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
             try {
-                const payload = await Order.findOne({ orderID: req.params.id })
+                const payload = await Order_Detail.findOne({ orderID: req.params.id })
                 res.json(payload)
             } catch (err) {
                 res.json({ message: err });
@@ -33,128 +47,130 @@ class OrderServices {
         // BaseAPI.authorizationAPI(req, res, async () => {
             let {customerDetail, productsInvoice, paymentDetail, totalDetail} = req.body
             var idCustomer = ''
-            await Customer.findOne({phoneNumber: customerDetail.phoneNumber}, async function(err, customer){
-                if(err){
-                    res.status(400).json({message: err.message})
-                }else{
-                    if(customer){
-                        idCustomer =  customer._id
-                        const postOrder = new Order({
-                            customer: idCustomer,
-                            total: totalDetail.total
-                        })
-                        await postOrder.save((err)=>{
-                            if(err){
-                                res.status(400).json({err: err.message, postSave: 'err in postSave'})
-                            }else{
-                                Customer.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
-                                    if(err){
-                                        res.status(400).json({err:err.message})
-                                    }else{
-                                        try{
-                                            for(let i = 0;i<productsInvoice.length;i++){
-                                                const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
-                                                const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
-                                                if(isSoldOut<0){
-                                                    res.status(400).json({message: 'product is sold out!'})
-                                                }
-                                                else{
-                                                    try{
-                                                        await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
-                                                    }catch(err){
-                                                        res.status(400).json({message: err.message})
-                                                    }
-                                                }
-                                            }
+            try{
+                await Customer.findOne({phoneNumber: customerDetail.phoneNumber}, async function(err, customer){
+                    if(err){
+                        res.status(400).json({message: err.message})
+                    }else{
+                        if(customer){
+                            idCustomer =  customer._id
+                            const postOrder = new Order({
+                                customer: idCustomer,
+                                total: totalDetail.total
+                            })
+                            await postOrder.save((err)=>{
+                                if(err){
+                                    res.status(400).json({err: err.message, postSave: 'err in postSave'})
+                                }else{
+                                    Customer.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
+                                        if(err){
+                                            res.status(400).json({err:err.message})
+                                        }else{
                                             try{
-                                                const postDetail = new Order_Detail({
-                                                    orderID: postOrder._id,
-                                                    customerDetail,
-                                                    productsInvoice, 
-                                                    paymentDetail, 
-                                                    totalDetail
-                                                })
-                                                await postDetail.save()
-                                                res.status(200).json({message:'successful'})
-                                            }catch(err){
-                                                res.status(400).json({message: err.message})
-                                            }
-                                        }catch(err){
-                                            res.status(400).json({message: err.message})
-                                        }
-                                    }
-                                })
-                            }
-                        })
-                    }
-                    else{
-                        const post = new Customer({
-                            phoneNumber:customerDetail.phoneNumber, 
-                            firstName:customerDetail.firstName, 
-                            lastName:customerDetail.lastName, 
-                            email:customerDetail.email,
-                            address:customerDetail.address
-                        })
-                        try {
-                            post.save(async (err)=>{
-                                if(err) res.status(400).json({message: err.message})
-                                idCustomer = post._id
-                                const postOrder = new Order({
-                                    customer: idCustomer,
-                                    total: totalDetail.total
-                                })
-                                await postOrder.save((err)=>{
-                                    if(err){
-                                        res.status(400).json({err: err.message, postSave: 'err in postSave'})
-                                    }else{
-                                        Customer.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
-                                            if(err){
-                                                res.status(400).json({err:err.message})
-                                            }else{
+                                                for(let i = 0;i<productsInvoice.length;i++){
+                                                    const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
+                                                    const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
+                                                    if(isSoldOut<0){
+                                                        res.status(400).json({message: 'product is sold out!'})
+                                                    }
+                                                    else{
+                                                        try{
+                                                            await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
+                                                        }catch(err){
+                                                            res.status(400).json({message: err.message})
+                                                        }
+                                                    }
+                                                }
                                                 try{
-                                                    for(let i = 0;i<productsInvoice.length;i++){
-                                                        const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
-                                                        const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
-                                                        if(isSoldOut<0){
-                                                            res.status(400).json({message: 'product is sold out!'})
-                                                        }
-                                                        else{
-                                                            try{
-                                                                await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
-                                                            }catch(err){
-                                                                res.status(400).json({message: err.message})
-                                                            }
-                                                        }
-                                                    }
-                                                    try{
-                                                        const postDetail = new Order_Detail({
-                                                            orderID: postOrder._id,
-                                                            customerDetail,
-                                                            productsInvoice, 
-                                                            paymentDetail, 
-                                                            totalDetail
-                                                        })
-                                                        await postDetail.save()
-                                                        res.status(200).json({message:'successful'})
-                                                    }catch(err){
-                                                        res.status(400).json({message: err.message})
-                                                    }
+                                                    const postDetail = new Order_Detail({
+                                                        orderID: postOrder._id,
+                                                        customerDetail,
+                                                        productsInvoice, 
+                                                        paymentDetail, 
+                                                        totalDetail
+                                                    })
+                                                    await postDetail.save()
+                                                    res.status(200).json({message:'successful'})
                                                 }catch(err){
                                                     res.status(400).json({message: err.message})
                                                 }
+                                            }catch(err){
+                                                res.status(400).json({message: err.message})
                                             }
-                                        })
-                                    }
-                                })
-                            });
-                        } catch (err) {
-                            res.status(400).json({ message: err });
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                        else{
+                            const post = new Customer({
+                                phoneNumber:customerDetail.phoneNumber, 
+                                firstName:customerDetail.firstName, 
+                                lastName:customerDetail.lastName, 
+                                email:customerDetail.email,
+                                address:customerDetail.address
+                            })
+                            try {
+                                post.save(async (err)=>{
+                                    if(err) res.status(400).json({message: err.message})
+                                    idCustomer = post._id
+                                    const postOrder = new Order({
+                                        customer: idCustomer,
+                                        total: totalDetail.total
+                                    })
+                                    await postOrder.save((err)=>{
+                                        if(err){
+                                            res.status(400).json({err: err.message, postSave: 'err in postSave'})
+                                        }else{
+                                            Customer.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
+                                                if(err){
+                                                    res.status(400).json({err:err.message})
+                                                }else{
+                                                    try{
+                                                        for(let i = 0;i<productsInvoice.length;i++){
+                                                            const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
+                                                            const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
+                                                            if(isSoldOut<0){
+                                                                res.status(400).json({message: 'product is sold out!'})
+                                                            }
+                                                            else{
+                                                                try{
+                                                                    await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
+                                                                }catch(err){
+                                                                    res.status(400).json({message: err.message})
+                                                                }
+                                                            }
+                                                        }
+                                                        try{
+                                                            const postDetail = new Order_Detail({
+                                                                orderID: postOrder._id,
+                                                                customerDetail,
+                                                                productsInvoice, 
+                                                                paymentDetail, 
+                                                                totalDetail
+                                                            })
+                                                            await postDetail.save()
+                                                            res.status(200).json({message:'successful'})
+                                                        }catch(err){
+                                                            res.status(400).json({message: err.message})
+                                                        }
+                                                    }catch(err){
+                                                        res.status(400).json({message: err.message})
+                                                    }
+                                                }
+                                            })
+                                        }
+                                    })
+                                });
+                            } catch (err) {
+                                res.status(400).json({ message: err });
+                            }
                         }
                     }
-                }
-            })
-            
-            
+                })
+            }catch(err){
+                res.status(400).json({message: err.message})
+            }
     }
     //Edit
     static async update(req, res) {
