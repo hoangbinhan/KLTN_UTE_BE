@@ -6,7 +6,7 @@ const OrderServices = require('../controller/orders.controller')
 router.get('/', OrderServices.get)
 router.get('/:id', OrderServices.getById)
 router.post('/', OrderServices.create)
-router.put('/', OrderServices.update)
+router.put('/', OrderServices.updateStatus)
 router.delete('/', OrderServices.delete)
 
 module.exports = router;

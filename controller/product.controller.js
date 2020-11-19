@@ -125,9 +125,18 @@ class ProductServices {
     //Edit
     static async update(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
+            let temp = {...req.body}
+            let result = {}
+            if(req.body.picture){
+                let listImage = []
+                result =  await cloud.uploads(req.body.picture[0].thumbUrl)
+                temp = {imageUrl: result.url,imageId: result.id}
+                listImage.push(temp)
+                temp={...temp, image: listImage}
+            }
             try {
-                const { productID } = req.body
-                await Product.findOneAndUpdate({ productID }, req.body, { new: true }, (err, result) => {
+                const { _id } = req.body
+                await Product.findOneAndUpdate({ _id }, temp, { new: true }, (err, result) => {
                     if (result || !err) {
                         res.status(200).json({
                             status: 'success',

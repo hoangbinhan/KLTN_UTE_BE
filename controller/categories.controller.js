@@ -88,14 +88,18 @@ class CategoriesServices {
 
     // Multer IMG
     static async uploadIMG(req, res) {
-        const result = await cloud.uploads(req.body.upload[0].thumbUrl)
+        let result = {
+            id: '',
+            url: ''
+        }
+        if(req.body.upload.length > 0){
+             result = await cloud.uploads(req.body.upload[0].thumbUrl)
+        }
         var post = new Post({
-            // categoryID: service.generateID('categoryID'),
             categoryName: req.body.categoryName,
             image: {...req.body.upload[0]},
             link: req.body.link,
             sortOrder: req.body.sortOrder,
-            children: req.body.children || [],
             status: req.body.status,
             imageUrl: result.url,
             imageId: result.id
@@ -131,12 +135,14 @@ class CategoriesServices {
 
     //Edit
     static async update(req, res) {
+        let temp = {...req.body}
+        let result = {}
+        if(req.body.upload){
+            result = await cloud.uploads(req.body.upload[0].thumbUrl)
+            temp = {...temp, image: temp.upload[0],  imageUrl: result.url, imageId: result.id}
+        }
+        
         try {
-            let temp = {...req.body}
-            if(temp.upload){
-                const result = await cloud.upload(temp.upload[0].thumbUrl)
-                temp = {...temp, image: temp.upload[0],  imageUrl: result.url, imageId: result.id}
-            }
             const {_id} = temp
             await Post.findOneAndUpdate({ _id }, temp, { new: true }, (err, result) => {
                 if (result || !err) {
@@ -156,7 +162,6 @@ class CategoriesServices {
     static async delete(req, res) {
         try {
             const { categoryID } = req.body
-            console.log(categoryID);
             await Post.deleteOne({ _id: categoryID }, async (err, result) => {
                 if (result || !err) {
                     res.json(result)

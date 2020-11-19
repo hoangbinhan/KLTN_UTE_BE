@@ -3,7 +3,9 @@ const Customer = require('../models/customers.model')
 const Order_Detail = require('../models/orders_detail.model')
 const Product = require('../models/products.model')
 const STATUS_TYPE = require('../common/constants').statusActive
-const service = require('../common/function')
+const service = require('../common/function');
+const { result } = require('lodash');
+const moment = require('moment')
 
 class OrderServices {
     //
@@ -171,6 +173,20 @@ class OrderServices {
             }catch(err){
                 res.status(400).json({message: err.message})
             }
+    }
+    static async updateStatus(req, res){
+        try{
+            const {_id, status} = req.body
+            await Order.findOneAndUpdate({_id}, {status, dateModified: moment().format()}, {new: true}, (err, result)=>{
+                if(err){
+                    res.status(400).json({message: err.message})
+                }else{
+                    res.status(200).json({message: 'successful'})
+                }
+            })
+        }catch(err){
+            res.status(400).json({message: err.message})
+        }
     }
     //Edit
     static async update(req, res) {
