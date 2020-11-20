@@ -7,7 +7,8 @@ const CategorySchema = mongoose.Schema({
     },
     link:{
         type:String,
-        require:true
+        require:true,
+        unique:true
     },
     image : {
         type : Object,

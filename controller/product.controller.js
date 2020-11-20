@@ -47,6 +47,7 @@ class ProductServices {
     }
     //GetALL
     static async get(req, res) {
+            console.log('req.query', req.query)
             try {
                 Product.aggregate([
                     {$lookup:{

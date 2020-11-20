@@ -12,7 +12,6 @@ class APIfeatures {
     }
     filtering() {
         const queryObj = { ...this.queryString };
-        console.log(queryObj);
         const excludedfields = ['page', 'sort', 'limit'];
         excludedfields.forEach(el => delete queryObj[el]);
         let querystr = JSON.stringify(queryObj);
@@ -48,11 +47,13 @@ class CategoriesServices {
     //GetALL
     static async get(req, res) {
         try {
-            const {text} = req.params
-            const features = new APIfeatures(Post.find(), req.query)
-                .filtering()
-                .sorting()
-            const payload = await features.query;
+            const {query} = await req
+            let condition = await {
+                categoryName: query.text ?  {$regex: query.text, $options: 'i'} : undefined,
+                status: query.status
+            }
+            await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
+            const payload = await Post.find(condition)
             res.status(200).json({
                 status: 'success',
                 result: payload.length,
@@ -69,6 +70,7 @@ class CategoriesServices {
     }
     // getID
     static async getById(req, res) {
+
         try {
             const payload = await Post.findOne({ categoryID: req.params.id })
             res.status(200).json({
