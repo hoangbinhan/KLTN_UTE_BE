@@ -8,7 +8,38 @@ const { result } = require('lodash');
 //
 
 const { CLIENT_URL } = process.env
-
+class APIfeatures {
+    constructor(query, queryString) {
+        this.query = query;
+        this.queryString = queryString;
+    }
+    filtering() {
+        const queryObj = { ...this.queryString };
+        console.log(queryObj);
+        const excludedfields = ['page', 'sort', 'limit'];
+        excludedfields.forEach(el => delete queryObj[el]);
+        let querystr = JSON.stringify(queryObj);
+        querystr = querystr.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`);
+        this.query.find(JSON.parse(querystr));
+        return this;
+    }
+    sorting() {
+        if (this.queryString.sort) {
+            const sortby = this.queryString.sort.split(',').join(' ');
+            this.query = this.query.sort(sortby);
+        } else {
+            this.query = this.query.sort('-createAt');
+        }
+        return this;
+    }
+    paginating() {
+        const page = this.queryString.page * 1 || 1;
+        const limit = this.queryString.limit * 1 || 4;
+        const skip = (page - 1) * limit;
+        this.query = this.query.skip(skip).limit(limit);
+        return this;
+    }
+}
 const StaffServices = {
     search: async (req, res) => {
         try {
@@ -16,8 +47,8 @@ const StaffServices = {
             Staff.find({ name: regex }).then((result) => {
                 res.status(200).json(result);
             })
-        }catch{
-            return res.status(500).json({ msg: err.message})
+        } catch {
+            return res.status(500).json({ msg: err.message })
         }
     },
     register: async (req, res) => {
@@ -87,7 +118,10 @@ const StaffServices = {
             })
             res.status(200).json({
                 status: 'Login success!',
-                token: create_token
+                token: {
+                    create_token,
+                    refresh_token
+                }
             })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -104,7 +138,7 @@ const StaffServices = {
                 const access_token = service.createAccessToken({ id: staff.id })
                 res.status(200).json({
                     status: "gettoken success",
-                    refresh_token : access_token 
+                    refresh_token: access_token
                 })
             })
         } catch (err) {
@@ -143,7 +177,12 @@ const StaffServices = {
     },
     getStaffInfor: async (req, res) => {
         try {
-            const staff = await Staff.findOne({ staffID: req.staff.id }).select('-password')
+            const feature = new APIfeatures(Staff.findOne({ staffID: req.staff.id }).select('-password'), req.query)
+            .filtering()
+            .sorting()
+            // const staff = await Staff.findOne({ staffID: req.staff.id }).select('-password')
+            const staff = await feature.query
+
             // console.log(user);
             res.json(staff)
         } catch (err) {
@@ -169,7 +208,7 @@ const StaffServices = {
             // res.json({ msg: "Update Success!" })
             const { staffID } = req.body
             const updateField = service.genUpdate(req.body,
-                ['name','status'])
+                ['name', 'status'])
             await Staff.findOneAndUpdate({ staffID }, updateField, { new: true }, (err, result) => {
                 if (result || !err) {
                     res.json(result)
@@ -177,215 +216,61 @@ const StaffServices = {
                     res.json(false)
                 }
             })
-            } catch (err) {
-                return res.status(500).json({ msg: err.message })
-            }
-        },
-        updateStaffsRole: async (req, res) => {
-            try {
-                const { role } = req.body
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    updateStaffsRole: async (req, res) => {
+        try {
+            const { role } = req.body
 
-                await Staff.findOneAndUpdate({ staffID: req.params.id }, {
-                    role
-                })
+            await Staff.findOneAndUpdate({ staffID: req.params.id }, {
+                role
+            })
 
-                res.json({ msg: "Update Success!" })
-            } catch (err) {
-                return res.status(500).json({ msg: err.message })
-            }
-        },
-            deleteStaff: async (req, res) => {
-                try {
-                    // const { userID } = req.body
-                    // await Staff.findByIdAndDelete(req.params.id, async (err, result) => {
-                    //     console.log(staff)
-                    // if (result || !err) {
-                    //     res.json(result)
-                    // } else {
-                    //     res.json(false)
-                    // }
+            res.json({ msg: "Update Success!" })
+        } catch (err) {
+            return res.status(500).json({ msg: err.message })
+        }
+    },
+    deleteStaff: async (req, res) => {
+        try {
+            // const { userID } = req.body
+            // await Staff.findByIdAndDelete(req.params.id, async (err, result) => {
+            //     console.log(staff)
+            // if (result || !err) {
+            //     res.json(result)
+            // } else {
+            //     res.json(false)
+            // }
 
-                    const { staffID } = req.body
-                    await Staff.deleteOne({ staffID }, async (err, result) => {
-                        if (result || !err) {
-                            res.json(result)
-                        } else {
-                            res.json(false)
-                        }
-                    })
-                } catch (error) {
-                    res.send('error :' + error)
+            const { staffID } = req.body
+            await Staff.deleteOne({ staffID }, async (err, result) => {
+                if (result || !err) {
+                    res.json(result)
+                } else {
+                    res.json(false)
                 }
-            },
-                deleteStaffStatus: async (req, res) => {
-                    try {
-                        const { staffID } = req.body
-                        await Staff.findOneAndUpdate({ staffID }, { status: 'INACTIVE' }, { new: true }, async (err, result) => {
-                            if (result || !err) {
-                                console.log(result)
-                                res.json(result)
-                            } else {
-                                res.json(false)
-                            }
-                        })
-
-                    } catch (error) {
-                        res.send('error :' + error)
-                    }
+            })
+        } catch (error) {
+            res.send('error :' + error)
+        }
+    },
+    deleteStaffStatus: async (req, res) => {
+        try {
+            const { staffID } = req.body
+            await Staff.findOneAndUpdate({ staffID }, { status: 'INACTIVE' }, { new: true }, async (err, result) => {
+                if (result || !err) {
+                    console.log(result)
+                    res.json(result)
+                } else {
+                    res.json(false)
                 }
+            })
 
-        //     static async get(req, res) {
-        //         BaseAPI.authorizationAPI(req, res, async () => {
-        //             const payload = await User.find({})
-        //             res.json(payload)
-        //         })
-        //     }
-
-        //     static async getById(req, res) {
-        //         BaseAPI.authorizationAPI(req, res, async (createdUser) => {
-        //             const payload = await User.find({ userID: req.params.id, createdUser: createdUser })
-        //             res.json(payload)
-        //         })
-        //     }
-
-        //     static async postLoginPassword(req, res) {
-        //         try {
-        //             const { email, password, isLogin } = req.body
-        //             res.json(await UserServices.onCreateUser({ isLogin, email, password: service.convertPasswordHMAC256(password) }))
-        //         } catch (error) {
-        //             res.status(500).send('error :' + error)
-        //         }
-        //     }
-
-        //     static async postLoginFacebook(req, res) {
-        //         try {
-        //             const { token } = req.body
-        //             FB.api('/me', { fields: ['userID', 'name', 'email', 'link', 'picture.type(large)'], access_token: token }, async (response) => {
-        //                 const { userID, name, email, picture } = response
-        //                 res.json(await UserServices.onCreateUser({ userID, name, email, picture: (picture && picture.data && picture.data.url) ? picture.data.url : '' }))
-        //             })
-        //         } catch (error) {
-        //             res.status(500).send('error :' + error)
-        //         }
-        //     }
-
-        //     static async postLoginGoogle(req, res) {
-        //         try {
-        //             const { token } = req.body
-        //             const response = await service.fetchAPI(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`)
-        //             res.json(await UserServices.onCreateUser(response))
-        //         } catch (error) {
-        //             res.status(500).send('error :' + error)
-        //         }
-        //     }
-
-        //     static async onCreateUser(response) {
-        //         return new Promise(async (resolve, reject) => {
-        //             const { userID, picture, password, email, isLogin, isLoginAdmin } = response
-        //             console.log(response)
-        //             const emailFormat = service.lowerCase(email)
-
-        //             const oldUser = password ? await User.findOne({ email: emailFormat }) : await User.findOne({ userID })
-
-        //             const jwtToken = service.generateToken(userID || emailFormat)
-        //             if (oldUser) {
-        //                 if (isLogin || isLoginAdmin) {
-        //                     if (oldUser.password !== password) {
-        //                         resolve({ errMess: 'namePwNotFound' })
-        //                     } else {
-        //                         if (isLoginAdmin) {
-        //                             if (oldUser.role === STATUS_TYPE.userRole.admin) {
-        //                                 await User.findOneAndUpdate({ userID }, { image: picture })
-        //                                 resolve(BaseAPI.verifyResult({ jwtToken, data: oldUser }))
-        //                             } else {
-        //                                 resolve({ errMess: 'notAdmin' })
-        //                             }
-        //                         } else {
-        //                             await User.findOneAndUpdate({ userID }, { image: picture })
-        //                             resolve(BaseAPI.verifyResult({ jwtToken, data: oldUser }))
-        //                         }
-        //                     }
-        //                 } else {
-        //                     if (password) {
-        //                         resolve({ errMess: 'userExisted' })
-        //                     } else {
-        //                         await User.findOneAndUpdate({ userID }, { image: picture })
-        //                         resolve(BaseAPI.verifyResult({ jwtToken, data: oldUser }))
-        //                     }
-        //                 }
-        //             } else {
-        //                 if (isLogin) {
-        //                     resolve({ errMess: 'namePwNotFound' })
-        //                 } else {
-        //                     const stateCreate = {
-        //                         userID : service.generateID('User'),
-        //                         firstName: response.family_name,
-        //                         lastName: response.given_name,
-        //                         email: emailFormat,
-        //                         image: picture
-        //                     }
-        //                     if (password) {
-        //                         stateCreate.password = password
-        //                     }
-        //                     const result = await User.create(stateCreate)
-        //                     resolve({ jwtToken, data: result })
-        //                 }
-        //             }
-        //         })
-        //     }
-
-        //     static async update(req, res) {
-        //         BaseAPI.authorizationAPI(req, res, async () => {
-        //             try {
-        //                 const { userID } = req.body
-        //                 const updateField = service.genUpdate(req.body,
-        //                     ['fullName', 'email', 'image', 'status'])
-        //                 await User.findOneAndUpdate({ userID }, updateField, { new: true }, (err, result) => {
-        //                     if (result || !err) {
-        //                         res.json(result)
-        //                     } else {
-        //                         res.json(false)
-        //                     }
-        //                 })
-        //             } catch (error) {
-        //                 res.status(500).send('error :' + error)
-        //             }
-        //         })
-        //     }
-
-        //     static async changePassword(req, res) {
-        //         try {
-        //             const { email, oldPassword, newPassword } = req.body
-
-        //             await User.findOneAndUpdate(
-        //                 { email, password: service.convertPasswordHMAC256(oldPassword) }, { password: service.convertPasswordHMAC256(newPassword) }, { new: true }, (err, result) => {
-        //                     if (result || !err) {
-        //                         res.json(result)
-        //                     } else {
-        //                         res.json(false)
-        //                     }
-        //                 })
-        //         } catch (error) {
-        //             res.status(500).send('error :' + error)
-        //         }
-        //     }
-
-
-        // static async delete(req, res) {
-        //     BaseAPI.authorizationAPI(req, res, async () => {
-        //         try {
-        //             const { userID, status } = req.body
-        //             await User.findOneAndUpdate({ userID }, { status }, { new: true }, async (err, result) => {
-        //                 if (result || !err) {
-        //                     res.json(result)
-        //                 } else {
-        //                     res.json(false)
-        //                 }
-        //             })
-        //         } catch (error) {
-        //             res.send('error :' + error)
-        //         }
-        //     })
-        // }
+        } catch (error) {
+            res.send('error :' + error)
+        }
     }
+}
 module.exports = StaffServices

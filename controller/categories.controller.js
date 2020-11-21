@@ -19,6 +19,7 @@ class APIfeatures {
         querystr = querystr.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`);
         this.query.find(JSON.parse(querystr));
         return this;
+        //  ?title= ; ?price[lte]= ;
     }
     sorting() {
         if (this.queryString.sort) {
@@ -28,6 +29,7 @@ class APIfeatures {
             this.query = this.query.sort('-createAt');
         }
         return this;
+        // ?sort=-price
     }
     paginating() {
         const page = this.queryString.page * 1 || 1;
@@ -35,6 +37,7 @@ class APIfeatures {
         const skip = (page - 1) * limit;
         this.query = this.query.skip(skip).limit(limit);
         return this;
+        // ?page=1&limit=5
     }
 }
 class CategoriesServices {
@@ -47,18 +50,44 @@ class CategoriesServices {
     }
     //GetALL
     static async get(req, res) {
+        // try {
+        //     const features = new APIfeatures(Post.find(), req.query)
+        //         .filtering()
+        //         .sorting()
+        //     const payload = await features.query;
+        //     res.status(200).json({
+        //         status: 'success',
+        //         result: payload.length,
+        //         data: {
+        //             payload
+        //         }
+        //     });
+        // } catch (err) {
+        //     res.status(400).json({
+        //         status: 'fail',
+        //         message: err
+        //     });
+        // }
         try {
-            const features = new APIfeatures(Post.find(), req.query)
-                .filtering()
-                .sorting()
-            const payload = await features.query;
-            res.status(200).json({
-                status: 'success',
-                result: payload.length,
-                data: {
-                    payload
-                }
-            });
+            const feature = new APIfeatures(Post.aggregate([
+                {$lookup:{
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'model'
+                }}
+            ]), req.query)
+            .filtering()
+            .sorting()
+            .exec(async function(err, data){
+                if(err)return
+                data = await feature.query;
+                return res.status(200).json({
+                    status:'success',
+                    result: data.length,
+                    data
+                })
+            })
         } catch (err) {
             res.status(400).json({
                 status: 'fail',

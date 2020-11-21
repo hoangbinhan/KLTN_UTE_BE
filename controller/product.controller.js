@@ -52,7 +52,7 @@ class ProductServices {
                 const features = new APIfeatures(Product.find(), req.query)
                     .filtering()
                     .sorting()
-                    .paginating();
+                    .paginating()
                 const payload = await features.query;
                 res.status(200).json({
                     status: 'success',
