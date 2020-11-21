@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
-const crypto = require('crypto-js');
+// const crypto = require('crypto-js');
 const verifyToken = (token) => {
     return jwt.verify(token, process.env.SECRET_TOKEN, (err) => !err)
 }

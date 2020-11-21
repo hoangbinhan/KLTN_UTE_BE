@@ -1,7 +1,8 @@
-const http = require('http');
+// const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const i18n = require('i18n');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
@@ -72,11 +73,15 @@ app.use('/api/children_category', children_category)
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');
 });
-
+// 
+i18n.configure({
+  locales: ['en', 'vi'],
+  directory: './locales'
+})
 // Connect Database
 app.listen(process.env.PORT || 3000, () => { 
   console.log(`SERVER RUN IN PORT ${process.env.PORT} `)
-}) ;
+});
 
 mongoose.connect(process.env.MONGO_URL, {
   useUnifiedTopology: true,
