@@ -1,6 +1,5 @@
 const Product = require('../models/products.model');
 const Categories = require('../models/categories.model')
-// const STATUS_TYPE = require('../common/constants').statusActive
 const cloud = require('../common/cloudinaryConfig');
 
 
@@ -39,74 +38,95 @@ class ProductServices {
     //Search
     static async search(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
-            var regex = new RegExp(req.params.productName, 'i');
-            Product.find({ productName: regex }).then((result) => {
-                res.status(200).json(result);
-            })
+        var regex = new RegExp(req.params.productName, 'i');
+        Product.find({ productName: regex }).then((result) => {
+            res.status(200).json(result);
+        })
         // });
     }
     //GetALL
     static async get(req, res) {
-            console.log('req.query', req.query)
-            try {
-                Product.aggregate([
-                    {$lookup:{
+        try {
+            const {query} = await req
+            let condition = await {
+                productName: query.text ?  {$regex: query.text, $options: 'i'} : undefined,
+                status: query.status,
+            }
+            await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
+            Product.aggregate([
+                {
+                    $match: condition
+                },
+                {
+                    $lookup: {
                         from: 'categories',
                         localField: 'category',
                         foreignField: '_id',
                         as: 'model'
-                    }}
-                ]).exec(function(err, data){
-                    if(err)return
-                    return res.status(200).json({
-                        status:'success',
-                        result: data.length,
-                        data
-                    })
+                    }
+                }
+            ]).exec(function (err, data) {
+                if (err) return
+                return res.status(200).json({
+                    status: 'success',
+                    result: data.length,
+                    data
                 })
-            } catch (err) {
-                res.status(400).json({
-                    status: 'fail',
-                    message: err
-                });
-            }
+            })
+        } catch (err) {
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
+        }
         // });
     }
     // getID
     static async getById(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
-            try {
-                const payload = await Product.findOne({ _id: req.params.id })
-                res.status(200).json({
-                    status: 'success',
-                    result: payload.length,
-                    data: {
-                        payload
-                    }
-                });
-            } catch (err) {
-                res.status(400).json({
-                    status: 'fail',
-                    message: err
-                });
-            }
+        try {
+            const payload = await Product.findOne({ _id: req.params.id })
+            res.status(200).json({
+                status: 'success',
+                result: payload.length,
+                data: {
+                    payload
+                }
+            });
+        } catch (err) {
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
+        }
         // });
     }
-    // Multer IMG
+
+    // post
     static async create(req, res) {
-            let listImage = []
-            const result =  await cloud.uploads(req.body.picture[0].thumbUrl)
-            const temp = {imageUrl: result.url,imageId: result.id}
-            listImage.push(temp)
+        const { category, description, discountPrice, price, guarantee, images, productName, quantity, status } = req.body
+        let listImage = []
+        try {
+            if (images) {
+                for (let i = 0; i < images.length; i++) {
+                    try {
+                        const result = await cloud.uploads(images[i])
+                        const temp = {uid: result.id, url: result.url}
+                        listImage.push(temp)
+                    } catch (err) {
+                        res.status(400).json({ err: `some problem in upload image // ${err}` })
+                    }
+                }
+            }
             var post = new Product({
-                productName: req.body.productName, 
-                description: req.body.description,
-                quantity: req.body.quantity,
-                price: req.body.price,
-                discountPrice: req.body.discountPrice,
-                guarantee: req.body.guarantee,
-                category: req.body.category,
-                status: req.body.status,
+                productName: productName,
+                description: description,
+                quantity: quantity,
+                price: price,
+                discountPrice: discountPrice,
+                guarantee: guarantee,
+                category: category,
+                status: status,
                 image: listImage
             });
             try {
@@ -121,23 +141,49 @@ class ProductServices {
                     message: err
                 });
             }
-        // });
+        } catch (err) {
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
+        }
     }
     //Edit
     static async update(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
-            let temp = {...req.body}
-            let result = {}
-            if(req.body.picture){
-                let listImage = []
-                result =  await cloud.uploads(req.body.picture[0].thumbUrl)
-                temp = {imageUrl: result.url,imageId: result.id}
-                listImage.push(temp)
-                temp={...temp, image: listImage}
-            }
+        var { _id, category, description, discountPrice, price, guarantee, picture, images, productName, quantity, status } = req.body
+        let listImage = []
+        try {
+            if (picture) {
+                listImage = await [...picture].filter((item)=>item.url)
+                if(images){
+                    for (let i = 0; i < images.length; i++) {
+                            try {
+                                const result = await cloud.uploads(req.body.images[i])
+                                const temp = {uid: result.id, url: result.url}
+                                listImage.push(temp)
+                            } catch (err) {
+                                res.status(400).json({ err: `some problem in upload image // ${err}` })
+                            }
+                        }
+                    }
+                }
             try {
-                const { _id } = req.body
-                await Product.findOneAndUpdate({ _id }, temp, { new: true }, (err, result) => {
+                var post = {
+                    productName: productName,
+                    description: description,
+                    quantity: quantity,
+                    price: price,
+                    discountPrice: discountPrice,
+                    guarantee: guarantee,
+                    category: category,
+                    status: status,
+                    image: listImage
+                }
+                if(!picture){
+                    await delete post.image
+                }
+                await Product.findOneAndUpdate({ _id }, post, { new: true }, (err, result) => {
                     if (result || !err) {
                         res.status(200).json({
                             status: 'success',
@@ -150,23 +196,26 @@ class ProductServices {
             } catch (error) {
                 res.status(500).send('error :' + error)
             }
+        } catch (err) {
+            res.status(400).json({ message: err })
+        }
         // });
     }
     //Delete
     static async delete(req, res) {
         // BaseAPI.authorizationAPI(req, res, async () => {
-            try {
-                const { productID } = req.body
-                await Product.deleteOne({ _id:productID }, async (err, result) => {
-                    if (result || !err) {
-                        res.json(result)
-                    } else {
-                        res.json(false)
-                    }
-                })
-            } catch (error) {
-                res.send('error :' + error)
-            }
+        try {
+            const { productID } = req.body
+            await Product.deleteOne({ _id: productID }, async (err, result) => {
+                if (result || !err) {
+                    res.json(result)
+                } else {
+                    res.json(false)
+                }
+            })
+        } catch (error) {
+            res.send('error :' + error)
+        }
         // });
     }
     //Delete Status

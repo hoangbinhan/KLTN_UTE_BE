@@ -2,9 +2,11 @@ const cloudinary = require('../common/cloudinaryConfig')
 const fs = require('fs');
 const path = require('path');
 
+
 class UploadServices {
   static async uploadImages(req, res) {
     const folderName = req.body.folderName
+    console.log('req.files.file', req.files)
     const uploader = async (path) => await cloudinary.uploads(path, `KLTN/${folderName}`);
     if (req.method === 'POST') {
       const urls = []

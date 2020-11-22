@@ -6,6 +6,8 @@ const i18n = require('i18n');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
+const cloud = require('./common/cloudinaryConfig');
+const cloudinary = require('cloudinary')
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -42,7 +44,6 @@ const paymentrouter = require('./routes/payments.route');
 const productrouter = require('./routes/products.route');
 const shipping_methodrouter = require('./routes/shipping_methods.route');
 const uploadImage = require('./routes/upload.route');
-//
 const categoriesrouter = require('./routes/categories.route')
 const children_category = require('./routes/children_category.route')
 const staff = require('./routes/staffs_account.route');
@@ -65,14 +66,28 @@ app.use('/api/products', productrouter);
 app.use('/api/shipping_methods', shipping_methodrouter);
 app.use('/api/upload', uploadImage)
 app.use('/api/staff', staff);
-//
-
 app.use('/api/categories', categoriesrouter)
 app.use('/api/children_category', children_category)
 //Router
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');
 });
+
+app.post('/upload-image', async function(req,res){
+  try{
+    // const result = await cloud.uploads(req.files.file.tempFilePath)
+    cloudinary.v2.uploader.upload(req.files.file.tempFilePath, function(err, result){
+      if(err){
+        console.log('err')
+      }
+    })
+    console.log(req.files.file.tempFilePath);
+    res.json({message: 'oke'})
+  }catch(err){
+    res.status(500).json({err})
+  }
+})
+
 // 
 i18n.configure({
   locales: ['en', 'vi'],

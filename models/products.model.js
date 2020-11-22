@@ -18,19 +18,18 @@ const ProductSchema = mongoose.Schema({
     },
     discountPrice:{
         type: Number,
-        required: true
     },
     guarantee:{
         type: Number,
         required: true
     },
     category:{
-        type: mongoose.Schema.Types.ObjectId,
+        type: [mongoose.Schema.Types.ObjectId],
         ref: "Categories"
     },
     status: {
         type: String, 
-        required: true
+        default: 'ACTIVE'
     },
     image : {
         type : Array,
