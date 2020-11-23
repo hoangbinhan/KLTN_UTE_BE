@@ -49,29 +49,11 @@ class CategoriesServices {
     }
     //GetALL
     static async get(req, res) {
-        // try {
-        //     const features = new APIfeatures(Post.find(), req.query)
-        //         .filtering()
-        //         .sorting()
-        //     const payload = await features.query;
-        //     res.status(200).json({
-        //         status: 'success',
-        //         result: payload.length,
-        //         data: {
-        //             payload
-        //         }
-        //     });
-        // } catch (err) {
-        //     res.status(400).json({
-        //         status: 'fail',
-        //         message: err
-        //     });
-        // }
         try {
             const {query} = await req
             let condition = await {
                 categoryName: query.text ?  {$regex: query.text, $options: 'i'} : undefined,
-                status: query.status
+                status: query.status,
             }
             await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
             const payload = await Post.find(condition)
