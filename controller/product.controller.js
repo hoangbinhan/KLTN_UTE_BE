@@ -48,38 +48,30 @@ class ProductServices {
     static async get(req, res) {
         try {
             const {query} = await req
+            const page = await query.page ? parseInt(query.page) - 1 : 0
+            const size = await query.size ? parseInt(query.size) : 10
             let condition = await {
                 productName: query.text ?  {$regex: query.text, $options: 'i'} : undefined,
+                category: query.category ? {$in: query.category} : undefined,
                 status: query.status,
             }
+            const sortValue = query.sort ? parseInt(query.sort) : undefined
             await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
-            Product.aggregate([
-                {
-                    $match: condition
-                },
-                {
-                    $lookup: {
-                        from: 'categories',
-                        localField: 'category',
-                        foreignField: '_id',
-                        as: 'model'
-                    }
-                }
-            ]).exec(function (err, data) {
-                if (err) return
-                return res.status(200).json({
-                    status: 'success',
-                    result: data.length,
-                    data
-                })
-            })
+            const payload = await Product.find(condition).skip(size * page).limit(size).sort({price:sortValue})
+            const total = await Product.countDocuments(condition)
+            res.status(200).json({
+                status: 'success',
+                total: total,
+                size: size ,
+                page: page,
+                data: payload
+            });
         } catch (err) {
             res.status(400).json({
                 status: 'fail',
                 message: err
             });
         }
-        // });
     }
     // getID
     static async getById(req, res) {
@@ -150,7 +142,6 @@ class ProductServices {
     }
     //Edit
     static async update(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
         var { _id, category, description, discountPrice, price, guarantee, picture, images, productName, quantity, status } = req.body
         let listImage = []
         try {
@@ -199,11 +190,9 @@ class ProductServices {
         } catch (err) {
             res.status(400).json({ message: err })
         }
-        // });
     }
     //Delete
     static async delete(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
         try {
             const { productID } = req.body
             await Product.deleteOne({ _id: productID }, async (err, result) => {
@@ -216,20 +205,6 @@ class ProductServices {
         } catch (error) {
             res.send('error :' + error)
         }
-        // });
     }
-    //Delete Status
-    // static async deletestatus(req, res) {
-    //     try {
-    //         const id = req.params.id
-    //         const payload = await Post.findOneAndUpdate({ id }, { status: 'INACTIVE' })
-    //         if (!payload) {
-    //             return res.json(false)
-    //         }
-    //         res.json(payload)
-    //     } catch (error) {
-    //         res.send('error :' + error)
-    //     }
-    // }
 }
 module.exports = ProductServices

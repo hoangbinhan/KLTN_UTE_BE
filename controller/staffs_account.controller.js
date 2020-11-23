@@ -22,7 +22,7 @@ const StaffAccountServices = {
     //register
     register: async (req, res) => {
         try {
-            const { username, password, role, status } = req.body
+            const { username, password, role, status, firstName, lastName, phoneNumber, address, email } = req.body
             if (!username || !password )
                 return res.status(400).json({ msg: "Please fill in all fields!" })
             const staff = await staffs_account.findOne({ username })
@@ -35,7 +35,12 @@ const StaffAccountServices = {
                     username,
                     password: passwordHash, 
                     role, 
-                    status
+                    status,
+                    firstName,
+                    lastName,
+                    phoneNumber,
+                    address,
+                    email
                 }
             ) 
             await newStaff.save()
@@ -70,7 +75,6 @@ const StaffAccountServices = {
             return res.status(500).json({ msg: err.message })
         }
     },
-
 
     login: async (req, res) => {
         try {

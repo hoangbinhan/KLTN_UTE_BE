@@ -24,8 +24,7 @@ const ProductSchema = mongoose.Schema({
         required: true
     },
     category:{
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "Categories"
+        type: [String]
     },
     status: {
         type: String, 
