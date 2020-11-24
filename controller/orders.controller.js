@@ -11,15 +11,46 @@ class OrderServices {
     //
     static async get(req, res) {
         try{
+            const {query} = await req 
+            let from_date =  query.from_date ? new Date(query.from_date) : undefined
+            let to_date =  query.to_date ? new Date(query.to_date) : undefined
+            let condition = await {
+                status: query.status,
+                dateAdded: {
+                    $gte: from_date,
+                    $lte: to_date 
+                }
+            }
+            let conditionCustomer = await {
+                phoneNumber: query.text ?  {$regex: query.text, $options: 'i'} : undefined
+            }
+            await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
+            await Object.keys(conditionCustomer).forEach(key => conditionCustomer[key] === undefined ? delete conditionCustomer[key] : {});
+            await condition.dateAdded.$lte ? condition.dateAdded.$lte.setHours(23,59,59) : delete condition[`dateAdded`]
             Order.aggregate([
+                {$match:condition},
                 {
                     $lookup:{
                         from: 'customers',
-                        localField: 'customer',
-                        foreignField: '_id',
+                        let: {customer: "$customer"},
+                        pipeline: [
+                            { $match:
+                                { $expr:
+                                   { $and:
+                                      [
+                                        { $eq: [ "$_id",  "$$customer" ] },
+                                      ]
+                                   }
+                                }
+                             },
+                            {
+                                $match: conditionCustomer
+                            }
+                        ],
                         as: 'customerDetail'
                     }
-                }
+                },
+                {$unwind: '$customerDetail'}
             ]).exec(function(err, data){
                 if(err) res.status(400).json({message: err.message})
                 return res.status(200).json({
@@ -174,6 +205,7 @@ class OrderServices {
                 res.status(400).json({message: err.message})
             }
     }
+
     static async updateStatus(req, res){
         try{
             const {_id, status} = req.body
@@ -240,3 +272,6 @@ class OrderServices {
     // }
 }
 module.exports = OrderServices
+
+
+
