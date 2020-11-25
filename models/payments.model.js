@@ -24,11 +24,9 @@ const PaymentSchema = mongoose.Schema({
     },
     cardHoldersName : {
         type : String,
-        
     },
     creditCardExpDate : {
         type : String,
-        
     },
     paymentMethodID : {
         type : String,

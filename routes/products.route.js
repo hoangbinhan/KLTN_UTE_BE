@@ -1,13 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const TestServices = require('../controller/product.controller')
+const ProductServices = require('../controller/product.controller')
+const auth = require('../common/auth');
+const authAdmin = require('../common/authAdmin');
 
 
-router.get('/', TestServices.TestServices.get)
-router.get('/:id', TestServices.TestServices.getById)
-router.post('/', TestServices.TestServices.create)
-router.put('/', TestServices.TestServices.update)
-router.delete('/', TestServices.TestServices.delete)
+router.get('/search/:productName',auth, ProductServices.search)
+router.get('/', auth, ProductServices.get)
+router.get('/:id',auth, ProductServices.getById)
+router.post('/',auth,authAdmin, ProductServices.create)
+router.put('/',auth, authAdmin, ProductServices.update)
+router.delete('/',auth, authAdmin, ProductServices.delete)
 
 module.exports = router;
 

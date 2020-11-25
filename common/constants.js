@@ -42,8 +42,7 @@ const categoryType = {
 
 const userRole = {
   admin: 'admin',
-  member: 'member',
-  moderator: 'moderator'
+  staff: 'staff'
 }
 
 const gender = {

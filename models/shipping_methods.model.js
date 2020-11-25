@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 const ShippingMethodSchema = mongoose.Schema({
-    shippingMethodID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
     shippingMethod : {
         type : String,
         required : true
+    },
+    shippingFee: {
+        type: String,
+        required: true
     },
     status:{
         type: String,

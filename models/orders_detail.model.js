@@ -1,35 +1,64 @@
 const mongoose = require('mongoose');
 const Order_detailSchema = mongoose.Schema({
-    orderDetailID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
     orderID : {
-        type : String,
+        type : mongoose.Types.ObjectId,
         required : true,
         // default: ''
     },
-    productID : {
-        type : String,
-        required : true,
-        // default: ''
+    customerDetail:{
+        address: {
+            type: String,
+        },
+        email:{
+            type: String
+        },
+        firstName:{
+            type: String
+        },
+        lastName:{
+            type: String
+        },
+        phoneNumber:{
+            type: String
+        }
     },
-    quantity : {
-        type : String,
-        required : true
+    paymentDetail:{
+        address:{
+            type: String
+        },
+        deliveryOption:{
+            type: String
+        },
+        district:{
+            type: String
+        },
+        ward:{
+            type: String
+        },
+        paymentMethod:{
+            type: String
+        },
+        provinceCity:{
+            type: String
+        },
     },
-    unitPrice : {
-        type : String,
-        required : true
-    },
-    discount : {
-        type : String,
-        required : true
-    },
-    status:{
-        type: String,
-        default: 'ACTIVE'
+    productsInvoice: [Object],
+    totalDetail:{
+        note:{
+            type: String
+        },
+        shippingFee:{
+            type: String
+        },
+        subTotal:{
+            type: String
+        },
+        total:{
+            type: String
+        },
+        unitOrder:{
+            type: String
+        },
     }
 });
 module.exports = mongoose.model('Order_details', Order_detailSchema);

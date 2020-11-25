@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const TestServices = require('../controller/payment_methods.controller')
+const Payment_methodServices = require('../controller/payment_methods.controller')
 
 
-router.get('/', TestServices.TestServices.get)
-router.get('/:id', TestServices.TestServices.getById)
-router.post('/', TestServices.TestServices.create)
-router.put('/', TestServices.TestServices.update)
-router.delete('/', TestServices.TestServices.delete)
+router.get('/', Payment_methodServices.get)
+router.get('/:id', Payment_methodServices.getById)
+router.post('/', Payment_methodServices.create)
+router.put('/', Payment_methodServices.update)
+router.delete('/', Payment_methodServices.delete)
 
 module.exports = router;
 

@@ -1,15 +1,6 @@
 const mongoose = require('mongoose');
 const PaymentMethodSchema = mongoose.Schema({
-    paymentMethodID : {
-        type : String,
-        required : true,
-        // default: ''
-    },
     paymentMethod : {
-        type : String,
-        required : true
-    },
-    creditCard : {
         type : String,
         required : true
     },
