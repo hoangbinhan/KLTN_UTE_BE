@@ -14,6 +14,7 @@ class OrderServices {
             const {query} = await req 
             const page = await query.page ? parseInt(query.page) - 1 : 0
             const size = await query.size ? parseInt(query.size) : 10
+            const sortValue = query.sort ? parseInt(query.sort) : 1
             let from_date =  query.from_date ? new Date(query.from_date) : undefined
             let to_date =  query.to_date ? new Date(query.to_date) : undefined
             let condition = await {
@@ -60,17 +61,17 @@ class OrderServices {
                         as: 'customerDetail'
                     }
                 },
+                {$sort: {total: sortValue}},
                 {$unwind: '$customerDetail'},
-                {$skip: size * page}, 
-                {$limit: size}
-            ]).exec(function(err, data){
+            ]).exec(function(err, data){    
+                const payload = [...data].slice(size*page, (page+1)*size)
                 if(err) res.status(400).json({message: err.message})
                 return res.status(200).json({
                     status: 'success',
-                    total: data.count,
+                    total: data.length,
                     size: size,
                     page: page,
-                    data
+                    data: payload
                 })
             })
         }catch(err){
