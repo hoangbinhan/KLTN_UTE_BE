@@ -6,7 +6,7 @@ const authAdmin = require('../common/authAdmin');
 
 
 router.get('/search/:productName',auth, ProductServices.search)
-router.get('/', auth, ProductServices.get)
+router.get('/', ProductServices.get)
 router.get('/:id',auth, ProductServices.getById)
 router.post('/',auth,authAdmin, ProductServices.create)
 router.put('/',auth, authAdmin, ProductServices.update)
