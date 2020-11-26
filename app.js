@@ -6,11 +6,10 @@ const i18n = require('i18n');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
-const cloud = require('./common/cloudinaryConfig');
 const cloudinary = require('cloudinary')
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: '*',
   optionsSuccessStatus: 200
 }
 

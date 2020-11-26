@@ -1,49 +1,7 @@
 const Product = require('../models/products.model');
-const Categories = require('../models/categories.model')
 const cloud = require('../common/cloudinaryConfig');
 
-
-class APIfeatures {
-    constructor(query, queryString) {
-        this.query = query;
-        this.queryString = queryString;
-    }
-    filtering() {
-        const queryObj = { ...this.queryString };
-        const excludedfields = ['page', 'sort', 'limit'];
-        excludedfields.forEach(el => delete queryObj[el]);
-        let querystr = JSON.stringify(queryObj);
-        querystr = querystr.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`);
-        this.query.find(JSON.parse(querystr));
-        return this;
-    }
-    sorting() {
-        if (this.queryString.sort) {
-            const sortby = this.queryString.sort.split(',').join(' ');
-            this.query = this.query.sort(sortby);
-        } else {
-            this.query = this.query.sort('-createAt');
-        }
-        return this;
-    }
-    paginating() {
-        const page = this.queryString.page * 1 || 1;
-        const limit = this.queryString.limit * 1 || 4;
-        const skip = (page - 1) * limit;
-        this.query = this.query.skip(skip).limit(limit);
-        return this;
-    }
-}
 class ProductServices {
-    //Search
-    static async search(req, res) {
-        // BaseAPI.authorizationAPI(req, res, async () => {
-        var regex = new RegExp(req.params.productName, 'i');
-        Product.find({ productName: regex }).then((result) => {
-            res.status(200).json(result);
-        })
-        // });
-    }
     //GetALL
     static async get(req, res) {
         try {
