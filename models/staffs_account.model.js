@@ -37,6 +37,10 @@ const  StaffAccountSchema = mongoose.Schema({
     email: {
         type: String,
         required: true
-    }
+    },
+    dateAdded: {
+        type: Date,
+        default: Date.now
+    },
 });
 module.exports = mongoose.model('staffs_account',StaffAccountSchema);

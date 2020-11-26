@@ -4,9 +4,9 @@ const StaffServices = require('../controller/staffs_account.controller');
 const auth = require('../common/auth');
 const authAdmin = require('../common/authAdmin');
 //
-router.get('/search/:name', StaffServices.search)
+router.get('/', StaffServices.getAll)
 
-router.post('/register', StaffServices.register)
+router.post('/', StaffServices.register)
 
 router.post('/activation', StaffServices.activateEmail)
 

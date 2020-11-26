@@ -8,21 +8,37 @@ const jwt = require('jsonwebtoken');
 const { CLIENT_URL } = process.env
 
 const StaffAccountServices = {
-    search: async (req, res) => {
+    getAll: async (req, res) => {
         try {
-            var regex = new RegExp(req.params.name, 'i');
-            Staff.find({ name: regex }).then((result) => {
-                res.status(200).json(result);
-            })
+            const {query} = await req
+            const page = await query.page ? parseInt(query.page) - 1 : 0
+            const size = await query.size ? parseInt(query.size) : 10
+            let condition = await {
+                status: query.status,
+            }
+            await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
+            const payload = await staffs_account.find(condition).skip(size * page).limit(size)
+            const total = await staffs_account.countDocuments(condition)
+            res.status(200).json({
+                status: 'success',  
+                total: total,
+                size: size ,
+                page: page,
+                data: payload
+            });
+           
         }catch{
-            return res.status(500).json({ msg: err.message})
+            res.status(400).json({
+                status: 'fail',
+                message: err
+            });
         }
     },
 
     //register
     register: async (req, res) => {
         try {
-            const { username, password, role, status, firstName, lastName, phoneNumber, address, email } = req.body
+            const { username, password, status, firstName, lastName, phoneNumber, address, email } = req.body
             if (!username || !password )
                 return res.status(400).json({ msg: "Please fill in all fields!" })
             const staff = await staffs_account.findOne({ username })
@@ -34,7 +50,6 @@ const StaffAccountServices = {
                 {
                     username,
                     password: passwordHash, 
-                    role, 
                     status,
                     firstName,
                     lastName,
@@ -51,7 +66,6 @@ const StaffAccountServices = {
             return res.status(500).json({ msg: err.message })
         }
     },
-
 
     activateEmail: async (req, res) => {
         try {
