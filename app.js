@@ -23,10 +23,8 @@ const app = express()
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.json())
-// app.use(bodyParser.json())
 app.use(express.static("public"))
 
-// app.use(cors())
 app.use(cors())
 app.use(cookieParser())
 app.use(fileUpload({
@@ -47,7 +45,6 @@ const categoriesrouter = require('./routes/categories.route')
 const children_category = require('./routes/children_category.route')
 const staff = require('./routes/staffs_account.route');
 //
-app.use(cors(corsOptions))
 app.use(bodyParser.json({limit: '50mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '50mb',parameterLimit: 100000, extended: true}));
 app.use(express.static("public"));
