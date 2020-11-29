@@ -47,6 +47,9 @@ const uploadImage = require('./routes/upload.route');
 const categoriesrouter = require('./routes/categories.route')
 const children_category = require('./routes/children_category.route')
 const staff = require('./routes/staffs_account.route');
+//client
+const clientCategories = require('./controller/client/categories.controller')
+
 //
 app.use(cors(corsOptions))
 app.use(bodyParser.json({limit: '50mb', extended: true}));
@@ -55,7 +58,7 @@ app.use(express.static("public"));
 
 // const uploadImage = require('./routes/upload.route');
 
-
+//dashboard
 app.use('/api/customers', customersrouter);
 app.use('/api/employees', employeesrouter);
 app.use('/api/order_detail', order_detailrouter);
@@ -68,6 +71,10 @@ app.use('/api/upload', uploadImage)
 app.use('/api/staff', staff);
 app.use('/api/categories', categoriesrouter)
 app.use('/api/children_category', children_category)
+
+//client
+app.use('/api/client/categories', clientCategories)
+
 //Router
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');
