@@ -60,7 +60,7 @@ class ProductServices {
             const payload = await Product.find(condition).skip(size * page).limit(size).sort({price:sortValue})
             const total = await Product.countDocuments(condition)
             res.status(200).json({
-                status: 'success',
+                status: 'success',  
                 total: total,
                 size: size ,
                 page: page,

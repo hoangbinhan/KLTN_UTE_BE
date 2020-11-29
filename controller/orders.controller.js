@@ -11,19 +11,67 @@ class OrderServices {
     //
     static async get(req, res) {
         try{
+            const {query} = await req 
+            const page = await query.page ? parseInt(query.page) - 1 : 0
+            const size = await query.size ? parseInt(query.size) : 10
+            const sortValue = query.sort ? parseInt(query.sort) : 1
+            let from_date =  query.from_date ? new Date(query.from_date) : undefined
+            let to_date =  query.to_date ? new Date(query.to_date) : undefined
+            let condition = await {
+                status: query.status,
+                dateAdded: {
+                    $gte: from_date,
+                    $lte: to_date 
+                }
+            }
+            //===================TODO FIX======================
+            // let objectSearchCustomer = await [
+            //     {phoneNumber: query.text ?  {$regex: query.text, $options: 'i'} : undefined},
+            //     {firstName:  query.text ?  {$regex: query.text, $options: 'i'} : undefined},
+            //     {lastName:  query.text ?  {$regex: query.text, $options: 'i'} : undefined}
+            // ]
+            // let conditionCustomer = await objectSearchCustomer.filter(item=>Object.values(item)[0]!==undefined)
+            //=================================================
+            let conditionCustomer = await {
+                phoneNumber: query.text ?  {$regex: query.text, $options: 'i'} : undefined
+            } 
+            await Object.keys(conditionCustomer).forEach(key => conditionCustomer[key] === undefined ? delete conditionCustomer[key] : {});
+            await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
+            await condition.dateAdded.$lte ? condition.dateAdded.$lte.setHours(23,59,59) : delete condition[`dateAdded`]
             Order.aggregate([
+                {$match:condition},
                 {
                     $lookup:{
                         from: 'customers',
-                        localField: 'customer',
-                        foreignField: '_id',
+                        let: {customer: "$customer"},
+                        pipeline: [
+                            { $match:
+                                { $expr:
+                                   { $and:
+                                      [
+                                        { $eq: [ "$_id",  "$$customer" ] },
+                                      ]
+                                   }
+                                }
+                             },
+                            {
+                                $match: conditionCustomer
+                            }
+                        ],
                         as: 'customerDetail'
                     }
-                }
-            ]).exec(function(err, data){
+                },
+                {$sort: {total: sortValue}},
+                {$unwind: '$customerDetail'},
+            ]).exec(function(err, data){    
+                const payload = [...data].slice(size*page, (page+1)*size)
                 if(err) res.status(400).json({message: err.message})
                 return res.status(200).json({
-                    data
+                    status: 'success',
+                    total: data.length,
+                    size: size,
+                    page: page,
+                    data: payload
                 })
             })
         }catch(err){
@@ -174,6 +222,7 @@ class OrderServices {
                 res.status(400).json({message: err.message})
             }
     }
+
     static async updateStatus(req, res){
         try{
             const {_id, status} = req.body
@@ -240,3 +289,6 @@ class OrderServices {
     // }
 }
 module.exports = OrderServices
+
+
+
