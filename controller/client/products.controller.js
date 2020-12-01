@@ -4,7 +4,7 @@ async function getProduct(req,res){
     try {
         const {query} = await req
         const page = await query.page ? parseInt(query.page) - 1 : 0
-        const size = await query.size ? parseInt(query.size) : 10
+        const size = await query.size ? parseInt(query.size) : 40
         let condition = await {
             productName: query.text ?  {$regex: query.text, $options: 'i'} : undefined,
             category: query.category ? {$in: query.category} : undefined,
@@ -28,3 +28,5 @@ async function getProduct(req,res){
         });
     }
 }
+
+module.exports = getProduct

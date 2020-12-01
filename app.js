@@ -65,7 +65,8 @@ app.use('/api/categories', categoriesrouter)
 app.use('/api/children_category', children_category)
 
 //client
-app.use('/api/client/categories', clientCategories)
+app.use('/api/client/home', clientCategories)
+
 
 //Router
 app.get('/', function (req, res, next) {
