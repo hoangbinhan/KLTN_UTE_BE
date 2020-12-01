@@ -9,26 +9,19 @@ const fileUpload = require('express-fileupload');
 const cloud = require('./common/cloudinaryConfig');
 const cloudinary = require('cloudinary')
 
-const corsOptions = {
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200
-}
-
 //require dotenv
 const dotenv = require('dotenv');
 
 dotenv.config();
 // setup express
 const app = express()
+app.use(cors())
 
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.json())
-// app.use(bodyParser.json())
 app.use(express.static("public"))
 
-// app.use(cors())
-app.use(cors())
 app.use(cookieParser())
 app.use(fileUpload({
     useTempFiles: true
@@ -51,7 +44,6 @@ const staff = require('./routes/staffs_account.route');
 const clientCategories = require('./controller/client/categories.controller')
 
 //
-app.use(cors(corsOptions))
 app.use(bodyParser.json({limit: '50mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '50mb',parameterLimit: 100000, extended: true}));
 app.use(express.static("public"));
