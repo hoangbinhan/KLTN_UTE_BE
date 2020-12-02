@@ -5,3 +5,5 @@ const getProduct = require('../../controller/client/products.controller')
 
 router.get('/categories', getCategories)
 router.get('/products', getProduct)
+
+module.exports = router

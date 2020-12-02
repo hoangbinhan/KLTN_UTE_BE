@@ -41,7 +41,7 @@ const categoriesrouter = require('./routes/categories.route')
 const children_category = require('./routes/children_category.route')
 const staff = require('./routes/staffs_account.route');
 //client
-const clientCategories = require('./controller/client/categories.controller')
+const client_home = require('./routes/client/home.route')
 
 //
 app.use(bodyParser.json({limit: '50mb', extended: true}));
@@ -63,9 +63,8 @@ app.use('/api/upload', uploadImage)
 app.use('/api/staff', staff);
 app.use('/api/categories', categoriesrouter)
 app.use('/api/children_category', children_category)
-
 //client
-app.use('/api/client/home', clientCategories)
+app.use('/api/client/home', client_home)
 
 
 //Router
