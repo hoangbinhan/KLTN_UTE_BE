@@ -42,6 +42,7 @@ const children_category = require('./routes/children_category.route')
 const staff = require('./routes/staffs_account.route');
 //client
 const client_home = require('./routes/client/home.route')
+const client_product = require('./routes/client/detail_product.route')
 
 //
 app.use(bodyParser.json({limit: '50mb', extended: true}));
@@ -65,7 +66,7 @@ app.use('/api/categories', categoriesrouter)
 app.use('/api/children_category', children_category)
 //client
 app.use('/api/client/home', client_home)
-
+app.use('/api/client/product', client_product)
 
 //Router
 app.get('/', function (req, res, next) {
