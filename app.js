@@ -43,7 +43,7 @@ const staff = require('./routes/staffs_account.route');
 //client
 const client_home = require('./routes/client/home.route')
 const client_product = require('./routes/client/detail_product.route')
-
+const user_customer = require('./routes/client/user_customer.route')
 //
 app.use(bodyParser.json({limit: '50mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '50mb',parameterLimit: 100000, extended: true}));
@@ -67,7 +67,7 @@ app.use('/api/children_category', children_category)
 //client
 app.use('/api/client/home', client_home)
 app.use('/api/client/product', client_product)
-
+app.use('/api/client/user', user_customer)
 //Router
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');
