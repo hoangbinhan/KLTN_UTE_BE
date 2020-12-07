@@ -5,5 +5,6 @@ const UserCustomerService = require('../../controller/client/user_customer.contr
 router.post('/register', UserCustomerService.register)
 router.post('/login', UserCustomerService.login)
 router.post('/add-to-cart', UserCustomerService.addToCart)
+router.get('/get-cart', UserCustomerService.getCart)
 
 module.exports = router

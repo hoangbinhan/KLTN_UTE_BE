@@ -133,6 +133,17 @@ const StaffServices = {
             return res.status(500).json({msg: err.message})
         }
     },
+
+    getCart: async(req,res)=>{
+        try{
+          CustomerAccount.watch().on('change', data=>console.log(data))
+           
+        }catch(err){
+            return res.status(500).json({msg: err.message})
+        }
+    }
+    
+    ,
     
     login: async (req, res) => {
         try {
