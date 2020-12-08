@@ -12,10 +12,6 @@ const {
 } = require('../../models/customers_account.model');
 //
 
-const generateSendSseCallback = res => update => {
-    res.write(`data: ${JSON.stringify(update)}\n\n`)
-}
-
 const {
     CLIENT_URL
 } = process.env
@@ -216,26 +212,20 @@ const StaffServices = {
     },
 
     getCart: async (req, res) => {
-        const {email} = req
-        res.writeHead(200, {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-        })
-        res.flushHeaders();
+        const {email} = await req.body
         try {
-            CustomerAccount.watch([
-                {
-                    '$match': {
-                        'email': email,
-                    },
-                }
-            ]).on('change', (data) =>{
-                const sseFormattedResponse = `data: ${data.fullDocument.cart}\n\n`;
-                res.write(sseFormattedResponse);
+            const firstData = await CustomerAccount.findOne()
+            res.sendEventStreamData(firstData);
+            const pipeline = [
+                { $match: { 'fullDocument.email': email } }
+            ];
+            const options = { fullDocument: 'updateLookup' };
+            const changeStream = CustomerAccount.watch(pipeline, options)
+            changeStream.on('change', data=>{
+                console.log('data', data)
+                res.sendEventStreamData(data.fullDocument);
             })
+            // close
         } catch (err) {
             return res.status(500).json({
                 msg: err.message
