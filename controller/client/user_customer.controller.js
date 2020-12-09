@@ -210,6 +210,60 @@ const StaffServices = {
             })
         }
     },
+    updateCart: async (req, res) => {
+        const {email, id, quantity} = req.body
+        try {
+            const customer = await CustomerAccount.findOne({
+                email
+            })
+            if (!customer) return res.status(500).json({
+                msg: 'customer invalid'
+            })
+            for (let i = 0; i < customer.cart.length; i++) {
+                if (customer.cart[i].id === id) {
+                    customer.cart[i].quantity += quantity
+                    break
+                }
+            }
+            await CustomerAccount.findOneAndUpdate({
+                email
+            }, customer)
+            return res.status(200).json({
+                msg: 'successful'
+            })
+        } catch (err) {
+            return res.status(500).json({
+                msg: err.message
+            })
+        }
+    },
+    deleteCart: async (req, res) => {
+        const {email, id} = req.body
+        try {
+            const customer = await CustomerAccount.findOne({
+                email
+            })
+            if (!customer) return res.status(500).json({
+                msg: 'customer invalid'
+            })
+            for(let i =0;i<customer.cart.length;i++){
+                if(customer.cart[i].id === id){
+                    customer.cart.splice(i,1)
+                    break
+                }
+            }
+            await CustomerAccount.findOneAndUpdate({
+                email
+            }, customer)
+            return res.status(200).json({
+                msg: 'successful'
+            })
+        } catch (err) {
+            return res.status(500).json({
+                msg: err.message
+            })
+        }
+    },
 
     getCart: async (req, res) => {
         const {email} = req.query
