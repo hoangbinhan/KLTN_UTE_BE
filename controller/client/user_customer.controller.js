@@ -214,23 +214,18 @@ const StaffServices = {
     getCart: async (req, res) => {
         const {email} = req.query
         try{
-            Product.aggregate([{
-                $lookup:{
-                    from: 'CustomerAccount',
-                    let: {},
-                    pipeline:[
-                        {$match: {email:email}},
-                        {$match:{$expr:{$eq:["$cart",'$_id']}}}
-                    ],
-                    as:'cart'
-                }
-            }]).exec(function(err,data){
-                if(err) res.status(400).json({message: err.message})
-                return res.status(200).json({
-                    data,
-                    length: data.length
-                })
-            }) 
+            let cart = []
+            let price = 0
+            let customer = await CustomerAccount.findOne({email})
+            if(!customer) return res.status(400).json({msg: err.message})
+            for(let i = 0;i<customer.cart.length;i++){
+                const productCart = await Product.findOne({_id: customer.cart[i].id})
+                if(!productCart) continue
+                const result = {item: productCart, quantity: customer.cart[i].quantity}
+                cart.push(result)
+                price +=  productCart.price * customer.cart[i].quantity
+            }
+            return res.status(200).json({cart, totalQuantity: cart.length, totalPrice: price})
 
         }catch(err){
             return res.status(400).json({msg: err.message})
