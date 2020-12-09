@@ -1,7 +1,7 @@
 const useServerSentEventsMiddleware = (req, res, next) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
-    // only if you want anyone to access this endpoint
+    res.setHeader('Content-Encoding', 'none');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.flushHeaders();
     const sendEventStreamData = (data) => {

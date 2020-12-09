@@ -6,6 +6,8 @@ const serverSendEvent = require('../../common/serverSendEvent')
 router.post('/register', UserCustomerService.register)
 router.post('/login', UserCustomerService.login)
 router.post('/add-to-cart', UserCustomerService.addToCart)
-router.get('/get-cart',serverSendEvent, UserCustomerService.getCart)
+router.get('/get-cart', UserCustomerService.getCart)
+
+// router.get('/get-cart',serverSendEvent, UserCustomerService.getCart)
 
 module.exports = router

@@ -212,25 +212,47 @@ const StaffServices = {
     },
 
     getCart: async (req, res) => {
-        const {email} = await req.body
-        try {
-            const firstData = await CustomerAccount.findOne()
-            res.sendEventStreamData(firstData);
-            const pipeline = [
-                { $match: { 'fullDocument.email': email } }
-            ];
-            const options = { fullDocument: 'updateLookup' };
-            const changeStream = CustomerAccount.watch(pipeline, options)
-            changeStream.on('change', data=>{
-                console.log('data', data)
-                res.sendEventStreamData(data.fullDocument);
-            })
-            // close
-        } catch (err) {
-            return res.status(500).json({
-                msg: err.message
-            })
+        const {email} = req.query
+        try{
+            Product.aggregate([{
+                $lookup:{
+                    from: 'CustomerAccount',
+                    let: {},
+                    pipeline:[
+                        {$match: {email:email}},
+                        {$match:{$expr:{$eq:["$cart",'$_id']}}}
+                    ],
+                    as:'cart'
+                }
+            }]).exec(function(err,data){
+                if(err) res.status(400).json({message: err.message})
+                return res.status(200).json({
+                    data,
+                    length: data.length
+                })
+            }) 
+
+        }catch(err){
+            return res.status(400).json({msg: err.message})
         }
+        // realtime with SSE
+        // try {
+        //     const firstData = await CustomerAccount.findOne({email:email})
+        //     res.sendEventStreamData(firstData);
+        //     const pipeline = [
+        //         { $match: { 'fullDocument.email': email } }
+        //     ];
+        //     const options = { fullDocument: 'updateLookup' };
+        //     const changeStream = CustomerAccount.watch(pipeline, options)
+        //     changeStream.on('change', data=>{
+        //         res.sendEventStreamData(data.fullDocument);
+        //     })
+        //     // close
+        // } catch (err) {
+        //     return res.status(500).json({
+        //         msg: err.message
+        //     })
+        // }
     },
 
     login: async (req, res) => {
