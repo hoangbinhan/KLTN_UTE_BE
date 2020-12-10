@@ -270,38 +270,22 @@ const StaffServices = {
         try{
             let cart = []
             let price = 0
+            let totalItem = 0
             let customer = await CustomerAccount.findOne({email})
             if(!customer) return res.status(400).json({msg: err.message})
             for(let i = 0;i<customer.cart.length;i++){
                 const productCart = await Product.findOne({_id: customer.cart[i].id})
                 if(!productCart) continue
                 const result = {item: productCart, quantity: customer.cart[i].quantity}
+                totalItem += customer.cart[i].quantity
                 cart.push(result)
                 price +=  productCart.price * customer.cart[i].quantity
             }
-            return res.status(200).json({cart, totalQuantity: cart.length, totalPrice: price})
+            return res.status(200).json({cart, totalQuantity: cart.length, totalPrice: price, totalItem})
 
         }catch(err){
             return res.status(400).json({msg: err.message})
         }
-        // realtime with SSE
-        // try {
-        //     const firstData = await CustomerAccount.findOne({email:email})
-        //     res.sendEventStreamData(firstData);
-        //     const pipeline = [
-        //         { $match: { 'fullDocument.email': email } }
-        //     ];
-        //     const options = { fullDocument: 'updateLookup' };
-        //     const changeStream = CustomerAccount.watch(pipeline, options)
-        //     changeStream.on('change', data=>{
-        //         res.sendEventStreamData(data.fullDocument);
-        //     })
-        //     // close
-        // } catch (err) {
-        //     return res.status(500).json({
-        //         msg: err.message
-        //     })
-        // }
     },
 
     login: async (req, res) => {
