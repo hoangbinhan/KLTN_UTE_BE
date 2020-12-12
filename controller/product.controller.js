@@ -193,8 +193,8 @@ class ProductServices {
     }
     //Delete
     static async delete(req, res) {
+        const { productID } = req.body
         try {
-            const { productID } = req.body
             await Product.deleteOne({ _id: productID }, async (err, result) => {
                 if (result || !err) {
                     res.json(result)

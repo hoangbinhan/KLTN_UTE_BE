@@ -113,6 +113,7 @@ const StaffServices = {
             })
         }
     },
+    
 
     activateEmail: async (req, res) => {
         try {
@@ -364,18 +365,17 @@ const StaffServices = {
             const {
                 email
             } = req.body
-            const staff = await Staff.findOne({
+            const customer = await CustomerAccount.findOne({
                 email
             })
-            if (!staff) return res.status(400).json({
+            if (!customer) return res.status(400).json({
                 msg: "This email does not exist."
             })
 
             const access_token = service.createAccessToken({
-                id: staff.staffID
+                email: customer.email
             })
-            const url = `${CLIENT_URL}/api/staff/reset/${access_token}`
-
+            const url = `${CLIENT_URL}/user/update-password/${access_token}`
             sendMail(email, url, "Reset your password")
             res.json({
                 msg: "Re-send the password, please check your email."
@@ -386,16 +386,14 @@ const StaffServices = {
             })
         }
     },
-    resetPassword: async (req, res) => {
+    updatePassword: async (req, res) => {
         try {
             const {
                 password
             } = req.body
-            // console.log(password)
             const passwordHash = await bcrypt.hash(password, 12)
-            // console.log(req.user)
-            await Staff.findOneAndUpdate({
-                staffID: req.staff.id
+            await CustomerAccount.findOneAndUpdate({
+                email: req.staff.email
             }, {
                 password: passwordHash
             })
