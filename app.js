@@ -8,11 +8,6 @@ const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 const cloudinary = require('cloudinary')
 
-const corsOptions = {
-  origin: '*',
-  optionsSuccessStatus: 200
-}
-
 //require dotenv
 const dotenv = require('dotenv');
 
@@ -20,12 +15,13 @@ dotenv.config();
 // setup express
 const app = express()
 
+app.use(cors())
+
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(express.json())
 app.use(express.static("public"))
 
-app.use(cors())
 app.use(cookieParser())
 app.use(fileUpload({
     useTempFiles: true
@@ -44,6 +40,10 @@ const uploadImage = require('./routes/upload.route');
 const categoriesrouter = require('./routes/categories.route')
 const children_category = require('./routes/children_category.route')
 const staff = require('./routes/staffs_account.route');
+//client
+const client_home = require('./routes/client/home.route')
+const client_product = require('./routes/client/detail_product.route')
+const user_customer = require('./routes/client/user_customer.route')
 //
 app.use(bodyParser.json({limit: '50mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '50mb',parameterLimit: 100000, extended: true}));
@@ -51,7 +51,7 @@ app.use(express.static("public"));
 
 // const uploadImage = require('./routes/upload.route');
 
-
+//dashboard
 app.use('/api/customers', customersrouter);
 app.use('/api/employees', employeesrouter);
 app.use('/api/order_detail', order_detailrouter);
@@ -64,6 +64,10 @@ app.use('/api/upload', uploadImage)
 app.use('/api/staff', staff);
 app.use('/api/categories', categoriesrouter)
 app.use('/api/children_category', children_category)
+//client
+app.use('/api/client/home', client_home)
+app.use('/api/client/product', client_product)
+app.use('/api/client/user', user_customer)
 //Router
 app.get('/', function (req, res, next) {
   res.send('Hello form node!!');

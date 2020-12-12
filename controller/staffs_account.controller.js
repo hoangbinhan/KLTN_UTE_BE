@@ -67,29 +67,6 @@ const StaffAccountServices = {
         }
     },
 
-    activateEmail: async (req, res) => {
-        try {
-            const { activation_token } = req.body
-            const staff = jwt.verify(activation_token, process.env.ACTIVATION_TOKEN_SECRET)
-
-            const { staffID, name, email, password } = staff
-
-            const check = await Staff.findOne({ email })
-            if (check) return res.status(400).json({ msg: "This email already exists." })
-
-            const newStaff = new Staff({
-                staffID, name, email, password
-            })
-
-            await newStaff.save()
-
-            res.json({ msg: "Account has been activated!" })
-
-        } catch (err) {
-            return res.status(500).json({ msg: err.message })
-        }
-    },
-
     login: async (req, res) => {
         try {
             const { username, password } = req.body
@@ -148,6 +125,26 @@ const StaffAccountServices = {
             return res.status(500).json({ msg: err.message })
         }
     },
+
+    updateInformation: async (req,res)=>{
+        try{
+            const _id = await req.body.id
+            const payload = await {...req.body, status: req.body.status ? 'ACTIVE' : 'DISABLE'}
+            await staffs_account.findOneAndUpdate({_id}, payload, {new:true}, (err, result) => {
+                if (result || !err) {
+                    res.status(200).json({
+                        status: 'success',
+                        data: result
+                    });
+                } else {
+                    res.status(500).json({err: err.message})
+                }
+            })
+        }catch(err){
+            return res.status(500).json({msg: err.message})
+        }
+    },
+
     resetPassword: async (req, res) => {
         try {
             const { password } = req.body
@@ -166,9 +163,8 @@ const StaffAccountServices = {
 
     getStaffInfor: async (req, res) => {
         try {
-            const staff = await Staff.findOne({ staffID: req.staff.id }).select('-password')
-            // console.log(user);
-            res.json(staff)
+            const staff = await staffs_account.findOne({ _id: req.params.id }).select('-password')
+            res.status(200).json({status:'success', data: staff})
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
