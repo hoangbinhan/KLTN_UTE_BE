@@ -7,6 +7,7 @@ router.post('/register', UserCustomerService.register)
 router.post('/login', UserCustomerService.login)
 router.post('/forgot-password', UserCustomerService.forgotPassword)
 router.put('/update-password', auth, UserCustomerService.updatePassword)
+router.post('/checkout', auth,  UserCustomerService.checkout)
 
 router.post('/cart', UserCustomerService.addToCart)
 router.get('/cart', UserCustomerService.getCart)

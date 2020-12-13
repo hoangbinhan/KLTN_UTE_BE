@@ -1,5 +1,7 @@
 const CustomerAccount = require('../../models/customers_account.model');
 const Product = require('../../models/products.model')
+const Order = require('../../models/orders.model')
+const Order_Detail = require('../../models/orders_detail.model')
 const service = require('../../common/function');
 const bcrypt = require('bcrypt');
 const sendMail = require('.././sendMail.controller');
@@ -24,7 +26,6 @@ class APIfeatures {
         const queryObj = {
             ...this.queryString
         };
-        console.log(queryObj);
         const excludedfields = ['page', 'sort', 'limit'];
         excludedfields.forEach(el => delete queryObj[el]);
         let querystr = JSON.stringify(queryObj);
@@ -114,7 +115,6 @@ const StaffServices = {
         }
     },
     
-
     activateEmail: async (req, res) => {
         try {
             const {
@@ -333,6 +333,73 @@ const StaffServices = {
             })
         }
     },
+    checkout: async (req, res) => {
+        // BaseAPI.authorizationAPI(req, res, async () => {
+            let {customerDetail, productsInvoice, paymentDetail, totalDetail} = req.body
+            customerDetail = {...customerDetail, email: req.staff.email}
+            var idCustomer = ''
+            try{
+                await CustomerAccount.findOne({email: req.staff.email}, async function(err, customer){
+                    if(err){
+                        res.status(400).json({message: err.message})
+                    }else{
+                        if(customer){
+                            idCustomer =  customer._id
+                            const postOrder = new Order({
+                                customer: idCustomer,
+                                total: totalDetail.total
+                            })
+                            await postOrder.save((err)=>{
+                                if(err){
+                                    res.status(400).json({err: err.message, postSave: 'err in postSave'})
+                                }else{
+                                    CustomerAccount.findOneAndUpdate({_id: idCustomer}, {$push:{invoices:postOrder._id}}, async (err)=>{
+                                        if(err){
+                                            res.status(400).json({err:err.message})
+                                        }else{
+                                            try{
+                                                for(let i = 0;i<productsInvoice.length;i++){
+                                                    const storedProduct =  await Product.findOne({_id:productsInvoice[i]._id})
+                                                    const isSoldOut = await storedProduct.quantity - productsInvoice[i].quantity
+                                                    if(isSoldOut<0){
+                                                        res.status(400).json({message: 'product is sold out!'})
+                                                    }
+                                                    else{
+                                                        try{
+                                                            await Product.findOneAndUpdate({_id:productsInvoice[i]._id}, {quantity: isSoldOut})
+                                                        }catch(err){
+                                                            res.status(400).json({message: err.message})
+                                                        }
+                                                    }
+                                                }
+                                                try{
+                                                    const postDetail = new Order_Detail({
+                                                        orderID: postOrder._id,
+                                                        customerDetail,
+                                                        productsInvoice, 
+                                                        paymentDetail, 
+                                                        totalDetail
+                                                    })
+                                                    await postDetail.save()
+                                                    res.status(200).json({message:'successful'})
+                                                }catch(err){
+                                                    res.status(400).json({message: err.message})
+                                                }
+                                            }catch(err){
+                                                res.status(400).json({message: err.message})
+                                            }
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    }
+                })
+            }catch(err){
+                res.status(400).json({message: err.message})
+            }
+    }
+    ,
 
     getAccessToken: (req, res) => {
         try {
@@ -427,7 +494,6 @@ const StaffServices = {
     },
     getStaffsAllInfor: async (req, res) => {
         try {
-            console.log(req.staff)
             const staffs = await Staff.find().select('-password')
             res.json(staffs)
         } catch (err) {
@@ -527,7 +593,6 @@ const StaffServices = {
                 new: true
             }, async (err, result) => {
                 if (result || !err) {
-                    console.log(result)
                     res.json(result)
                 } else {
                     res.json(false)
