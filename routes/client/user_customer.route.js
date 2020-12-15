@@ -7,12 +7,12 @@ router.post('/register', UserCustomerService.register)
 router.post('/login', UserCustomerService.login)
 router.post('/forgot-password', UserCustomerService.forgotPassword)
 router.put('/update-password', auth, UserCustomerService.updatePassword)
-router.post('/checkout', auth,  UserCustomerService.checkout)
+router.post('/checkout', auth, UserCustomerService.checkout)
 
-router.post('/cart', UserCustomerService.addToCart)
-router.get('/cart', UserCustomerService.getCart)
-router.put('/cart', UserCustomerService.updateCart)
-router.delete('/cart',UserCustomerService.deleteCart)
+router.post('/cart', auth, UserCustomerService.addToCart)
+router.get('/cart', auth, UserCustomerService.getCart)
+router.put('/cart', auth, UserCustomerService.updateCart)
+router.delete('/cart', auth, UserCustomerService.deleteCart)
 
 // router.get('/get-cart',serverSendEvent, UserCustomerService.getCart)
 

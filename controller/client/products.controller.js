@@ -34,7 +34,6 @@ async function getProduct(req,res){
                 sortPrice = undefined;
                 break
         }
-        console.log(sortName);
         await Object.keys(condition).forEach(key => condition[key] === undefined ? delete condition[key] : {});
         const payload = await Product.find(condition).skip(size * page).limit(size).sort({"price":sortPrice,"productName":sortName })
         const total = await Product.countDocuments(condition)
