@@ -12,7 +12,6 @@ class APIfeatures {
 
 class ChildrebServices {
     static async addNew(req,res){
-        console.log('req.body', req.body)
         let post = new Post({
             childrenCategoryName : req.body.childrenCategoryName,
             link: req.body.link,

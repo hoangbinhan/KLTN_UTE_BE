@@ -3,7 +3,6 @@ const Order_detailSchema = mongoose.Schema({
     orderID : {
         type : mongoose.Types.ObjectId,
         required : true,
-        // default: ''
     },
     customerDetail:{
         address: {
