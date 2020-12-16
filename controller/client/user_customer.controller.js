@@ -8,9 +8,7 @@ const sendMail = require('.././sendMail.controller');
 const jwt = require('jsonwebtoken');
 //
 
-const {
-  CLIENT_URL
-} = process.env;
+const { CLIENT_URL } = process.env;
 class APIfeatures {
   constructor(query, queryString) {
     this.query = query;
@@ -61,13 +59,7 @@ const StaffServices = {
   },
   register: async (req, res) => {
     try {
-      const {
-        name,
-        email,
-        password,
-        phoneNumber,
-        address
-      } = req.body;
+      const { name, email, password, phoneNumber, address } = req.body;
       if (!name || !email || !password)
         return res.status(400).json({
           msg: 'Please fill in all fields!',
@@ -112,20 +104,13 @@ const StaffServices = {
 
   activateEmail: async (req, res) => {
     try {
-      const {
-        activation_token
-      } = req.body;
+      const { activation_token } = req.body;
       const staff = jwt.verify(
         activation_token,
         process.env.ACTIVATION_TOKEN_SECRET
       );
 
-      const {
-        staffID,
-        name,
-        email,
-        password
-      } = staff;
+      const { staffID, name, email, password } = staff;
 
       const check = await Staff.findOne({
         email,
@@ -158,10 +143,7 @@ const StaffServices = {
     try {
       let isAdd = false;
       const email = req.staff.email;
-      const {
-        product,
-        quantity
-      } = req.body;
+      const { product, quantity } = req.body;
       const productInStore = await Product.findOne({
         _id: product,
       });
@@ -194,17 +176,12 @@ const StaffServices = {
           quantity: quantity,
         });
       }
-      await CustomerAccount.findOneAndUpdate({
+      await CustomerAccount.findOneAndUpdate(
+        {
           email,
         },
         customer
       );
-      // if(isAdd){
-      //     await CustomerAccount.findOneAndUpdate({email}, {$set: {cart: {id: product, quantity: isOldQuantity+ quantity}}})
-      // }else{
-      //     await CustomerAccount.findOneAndUpdate({email}, {$push: {cart: {id: product, quantity: quantity}}})
-      // }
-
       return res.status(200).json({
         msg: 'successful',
       });
@@ -216,10 +193,7 @@ const StaffServices = {
   },
   updateCart: async (req, res) => {
     const email = req.staff.email;
-    const {
-      id,
-      quantity
-    } = req.body;
+    const { id, quantity } = req.body;
     try {
       const customer = await CustomerAccount.findOne({
         email,
@@ -234,7 +208,8 @@ const StaffServices = {
           break;
         }
       }
-      await CustomerAccount.findOneAndUpdate({
+      await CustomerAccount.findOneAndUpdate(
+        {
           email,
         },
         customer
@@ -250,9 +225,7 @@ const StaffServices = {
   },
   deleteCart: async (req, res) => {
     const email = req.staff.email;
-    const {
-      id
-    } = req.body;
+    const { id } = req.body;
     try {
       const customer = await CustomerAccount.findOne({
         email,
@@ -267,7 +240,8 @@ const StaffServices = {
           break;
         }
       }
-      await CustomerAccount.findOneAndUpdate({
+      await CustomerAccount.findOneAndUpdate(
+        {
           email,
         },
         customer
@@ -323,10 +297,7 @@ const StaffServices = {
 
   login: async (req, res) => {
     try {
-      const {
-        email,
-        password
-      } = req.body;
+      const { email, password } = req.body;
       const customer = await CustomerAccount.findOne({
         email,
       });
@@ -367,6 +338,7 @@ const StaffServices = {
       });
     }
   },
+
   checkout: async (req, res) => {
     let {
       customerDetail,
@@ -379,7 +351,8 @@ const StaffServices = {
     };
     var idCustomer = '';
     try {
-      await CustomerAccount.findOne({
+      await CustomerAccount.findOne(
+        {
           email: req.staff.email,
         },
         async function (err, customer) {
@@ -401,9 +374,11 @@ const StaffServices = {
                     postSave: 'err in postSave',
                   });
                 } else {
-                  CustomerAccount.findOneAndUpdate({
+                  CustomerAccount.findOneAndUpdate(
+                    {
                       _id: idCustomer,
-                    }, {
+                    },
+                    {
                       $push: {
                         invoices: postOrder._id,
                       },
@@ -431,11 +406,14 @@ const StaffServices = {
                               });
                             } else {
                               try {
-                                await Product.findOneAndUpdate({
-                                  _id: productsInvoice[i].item._id,
-                                }, {
-                                  quantity: isSoldOut,
-                                });
+                                await Product.findOneAndUpdate(
+                                  {
+                                    _id: productsInvoice[i].item._id,
+                                  },
+                                  {
+                                    quantity: isSoldOut,
+                                  }
+                                );
                               } catch (err) {
                                 res.status(400).json({
                                   message: err.message,
@@ -480,6 +458,7 @@ const StaffServices = {
       });
     }
   },
+
   getAccessToken: (req, res) => {
     try {
       const rf_token = req.cookies.refreshtoken;
@@ -508,11 +487,10 @@ const StaffServices = {
       });
     }
   },
+
   forgotPassword: async (req, res) => {
     try {
-      const {
-        email
-      } = req.body;
+      const { email } = req.body;
       const customer = await CustomerAccount.findOne({
         email,
       });
@@ -535,17 +513,19 @@ const StaffServices = {
       });
     }
   },
+
   updatePassword: async (req, res) => {
     try {
-      const {
-        password
-      } = req.body;
+      const { password } = req.body;
       const passwordHash = await bcrypt.hash(password, 12);
-      await CustomerAccount.findOneAndUpdate({
-        email: req.staff.email,
-      }, {
-        password: passwordHash,
-      });
+      await CustomerAccount.findOneAndUpdate(
+        {
+          email: req.staff.email,
+        },
+        {
+          password: passwordHash,
+        }
+      );
       res.json({
         msg: 'Password successfully changed!',
       });
@@ -555,21 +535,21 @@ const StaffServices = {
       });
     }
   },
+
   getOrders: async (req, res) => {
     try {
-      const {
-        email
-      } = req.staff;
+      const { email } = req.staff;
       const customer = await CustomerAccount.findOne({
         email,
       });
-      if (!customer) res.status(500).json({
-        msg: err.message
-      });
+      if (!customer)
+        res.status(500).json({
+          msg: err.message,
+        });
       let orders = [];
       for (let i = 0; i < customer.invoices.length; i++) {
         let order = await Order.findOne({
-          _id: customer.invoices[i]
+          _id: customer.invoices[i],
         });
         if (order) orders.push(order);
       }
@@ -579,70 +559,98 @@ const StaffServices = {
       });
     } catch (err) {
       res.status(500).json({
-        msg: err.message
+        msg: err.message,
       });
+    }
+  },
+  getDetailOrder: async (req, res) => {
+    try {
+      const id = req.query.id;
+      const { email } = req.staff;
+      const customer = await CustomerAccount.findOne({
+        email,
+      });
+      if (!customer)
+        return res.status(500).json({
+          msg: 'Can not find the customer!',
+        });
+      const invoicesLength = customer.invoices.length;
+      for (let i = 0; i < invoicesLength; i++) {
+        if (customer.invoices[i] == id) {
+          const orderDetail = await Order_Detail.findOne({ orderID: id });
+          if (!orderDetail)
+            return res.status(500).json({
+              msg: 'Can not find the order!',
+            });
+          return res.status(200).json({ data: orderDetail });
+        }
+      }
+    } catch (err) {
+      res.status(500).json({ msg: err.message });
     }
   },
   getInformation: async (req, res) => {
     try {
-      const {
-        email
-      } = req.staff
+      const { email } = req.staff;
       const info = await CustomerAccount.findOne({
-        email
-      })
-      if (!info) return res.status(500).json({
-        msg: 'Can not find the customer!'
-      })
+        email,
+      });
+      if (!info)
+        return res.status(500).json({
+          msg: 'Can not find the customer!',
+        });
       const data = {
         email: info.email,
         name: info.name,
         phoneNumber: info.phoneNumber,
-        address: info.address
-      }
+        address: info.address,
+      };
       return res.status(200).json({
-        data
-      })
+        data,
+      });
     } catch (err) {
       return res.status(500).json({
-        msg: err.message
-      })
+        msg: err.message,
+      });
     }
   },
   updateInformation: async (req, res) => {
     try {
-      const {
-        email
-      } = req.staff
-      const info = await CustomerAccount.findOneAndUpdate({
-        email
-      }, {
-        name:req.body.name,
-        phoneNumber: req.body.phoneNumber,
-        address: req.body.address
-      }, {
-        new: true
-      })
-      if (!info) return res.status(500).json({
-        msg: 'Can not find the customer!'
-      })
+      const { email } = req.staff;
+      const info = await CustomerAccount.findOneAndUpdate(
+        {
+          email,
+        },
+        {
+          name: req.body.name,
+          phoneNumber: req.body.phoneNumber,
+          address: req.body.address,
+        },
+        {
+          new: true,
+        }
+      );
+      if (!info)
+        return res.status(500).json({
+          msg: 'Can not find the customer!',
+        });
       return res.status(200).json({
-        msg:'successfull'
-      })
+        msg: 'successfull',
+      });
     } catch (err) {
       return res.status(500).json({
-        msg: err.message
-      })
+        msg: err.message,
+      });
     }
   },
   getStaffInfor: async (req, res) => {
     try {
       const feature = new APIfeatures(
-          Staff.findOne({
-            staffID: req.staff.id,
-          }).select('-password'),
-          req.query
-        )
+        Staff.findOne({
+          staffID: req.staff.id,
+        }).select('-password'),
+        req.query
+      )
         .filtering()
         .sorting();
       // const staff = await Staff.findOne({ staffID: req.staff.id }).select('-password')
@@ -674,14 +682,14 @@ const StaffServices = {
       //     name, // avatar
       // })
       // res.json({ msg: "Update Success!" })
-      const {
-        staffID
-      } = req.body;
+      const { staffID } = req.body;
       const updateField = service.genUpdate(req.body, ['name', 'status']);
-      await Staff.findOneAndUpdate({
+      await Staff.findOneAndUpdate(
+        {
           staffID,
         },
-        updateField, {
+        updateField,
+        {
           new: true,
         },
         (err, result) => {
@@ -700,15 +708,16 @@ const StaffServices = {
   },
   updateStaffsRole: async (req, res) => {
     try {
-      const {
-        role
-      } = req.body;
+      const { role } = req.body;
 
-      await Staff.findOneAndUpdate({
-        staffID: req.params.id,
-      }, {
-        role,
-      });
+      await Staff.findOneAndUpdate(
+        {
+          staffID: req.params.id,
+        },
+        {
+          role,
+        }
+      );
 
       res.json({
         msg: 'Update Success!',
@@ -730,10 +739,9 @@ const StaffServices = {
       //     res.json(false)
       // }
 
-      const {
-        staffID
-      } = req.body;
-      await Staff.deleteOne({
+      const { staffID } = req.body;
+      await Staff.deleteOne(
+        {
           staffID,
         },
         async (err, result) => {
@@ -750,14 +758,15 @@ const StaffServices = {
   },
   deleteStaffStatus: async (req, res) => {
     try {
-      const {
-        staffID
-      } = req.body;
-      await Staff.findOneAndUpdate({
+      const { staffID } = req.body;
+      await Staff.findOneAndUpdate(
+        {
           staffID,
-        }, {
+        },
+        {
           status: 'INACTIVE',
-        }, {
+        },
+        {
           new: true,
         },
         async (err, result) => {

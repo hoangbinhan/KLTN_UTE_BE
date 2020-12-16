@@ -15,9 +15,10 @@ router.put('/cart', auth, UserCustomerService.updateCart);
 router.delete('/cart', auth, UserCustomerService.deleteCart);
 
 router.get('/orders', auth, UserCustomerService.getOrders);
-router.get('/information', auth, UserCustomerService.getInformation)
-router.put('/information', auth, UserCustomerService.updateInformation)
-router.put('/change-password', auth, UserCustomerService.updatePassword)
+router.get('/detail-order', auth, UserCustomerService.getDetailOrder);
+router.get('/information', auth, UserCustomerService.getInformation);
+router.put('/information', auth, UserCustomerService.updateInformation);
+router.put('/change-password', auth, UserCustomerService.updatePassword);
 // router.get('/get-cart',serverSendEvent, UserCustomerService.getCart)
 
 module.exports = router;
