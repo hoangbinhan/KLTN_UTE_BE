@@ -395,7 +395,7 @@ const StaffServices = {
                         try {
                           for (let i = 0; i < productsInvoice.length; i++) {
                             const storedProduct = await Product.findOne({
-                              _id: productsInvoice[i].item._id,
+                              _id: productsInvoice[i]._id,
                             });
                             const isSoldOut =
                               (await storedProduct.quantity) -
@@ -408,7 +408,7 @@ const StaffServices = {
                               try {
                                 await Product.findOneAndUpdate(
                                   {
-                                    _id: productsInvoice[i].item._id,
+                                    _id: productsInvoice[i]._id,
                                   },
                                   {
                                     quantity: isSoldOut,
