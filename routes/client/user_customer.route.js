@@ -19,7 +19,7 @@ router.get('/detail-order', auth, UserCustomerService.getDetailOrder);
 router.get('/information', auth, UserCustomerService.getInformation);
 router.put('/information', auth, UserCustomerService.updateInformation);
 router.put('/change-password', auth, UserCustomerService.updatePassword);
-router.post('/comment', auth, UserCustomerService.ratingPrododuct)
+router.post('/rating', auth, UserCustomerService.ratingProduct);
 // router.get('/get-cart',serverSendEvent, UserCustomerService.getCart)
 
 module.exports = router;
