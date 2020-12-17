@@ -8,6 +8,7 @@ const sendMail = require('.././sendMail.controller');
 const jwt = require('jsonwebtoken');
 const uuidv1 = require('uuid/v1');
 const https = require('https');
+const moment = require('moment')
 var endpoint = "https://test-payment.momo.vn/gw_payment/transactionProcessor"
 var hostname = "https://test-payment.momo.vn"
 var path = "/gw_payment/transactionProcessor"
@@ -471,7 +472,7 @@ const StaffServices = {
                                 partnerCode: partnerCode,
                                 accessKey: accessKey,
                                 requestId: postOrder._id,
-                                amount: totalDetail.total+'',
+                                amount: totalDetail.total + '',
                                 orderId: postOrder._id,
                                 orderInfo: orderInfo,
                                 returnUrl: returnUrl,
@@ -501,7 +502,8 @@ const StaffServices = {
                                   console.log('payURL');
                                   console.log(JSON.parse(body).payUrl);
                                 });
-                                resMomo.on('end', () => {
+                                resMomo.on('end', (data) => {
+                                  console.log(data);
                                   console.log('No more data in response.');
                                 });
                               });
@@ -512,6 +514,7 @@ const StaffServices = {
                               reqMomo.write(body);
                               reqMomo.end();
                             }
+
                             res.status(200).json({
                               message: 'successful',
                             });
@@ -569,7 +572,6 @@ const StaffServices = {
       });
     }
   },
-
   forgotPassword: async (req, res) => {
     try {
       const {
@@ -734,6 +736,44 @@ const StaffServices = {
       return res.status(500).json({
         msg: err.message,
       });
+    }
+  },
+  ratingPrododuct: async (req, res) => {
+    try {
+      const {
+        email
+      } = req.staff
+      const {
+        rating,
+        comment,
+        id
+      } = req.body
+      if (!email) return res.status(500).json({
+        msg: 'can not find the customer!'
+      })
+      const record = {
+        email,
+        rating,
+        comment,
+        date: moment().format('MMMM Do YYYY, h:mm:ss a')
+      }
+      const product = await Product.findByIdAndUpdate({
+        _id: id
+      }, {
+        $push: {
+          comment: record
+        }
+      })
+      if (!product) return res.status(500).json({
+        msg: 'can not find the customer!'
+      })
+      return res.status(200).json({
+        msg: 'successfull',
+      });
+    } catch (err) {
+      return res.status(500).json({
+        msg: err.message
+      })
     }
   },
   getStaffInfor: async (req, res) => {
