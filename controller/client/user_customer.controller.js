@@ -17,7 +17,7 @@ var accessKey = 'VBWuaoUC0N69pBvg';
 var serectkey = 'GJOorUVT2R6txlsnCeI4ZGnYpmGNFvPp';
 var orderInfo = 'pay with MoMo';
 var returnUrl = 'https://google.com';
-var notifyurl = 'http://localhost:3001/api/client/user/response-mongo';
+var notifyurl = 'https://google.com';
 var requestType = 'captureMoMoWallet';
 var extraData = '';
 //
@@ -561,8 +561,11 @@ const StaffServices = {
                                 options,
                                 (resMomo) => {
                                   resMomo.setEncoding('utf8');
-                                  resMomo.on('data', (body) => {
-                                    console.log(JSON.parse(body).payUrl);
+                                  resMomo.on('data', async (body) => {
+                                    await res.status(200).json({
+                                      urlQrcode: JSON.parse(body).payUrl,
+                                      message: 'successful',
+                                    });
                                   });
                                   resMomo.on('end', (data) => {
                                     console.log(data);
@@ -579,10 +582,11 @@ const StaffServices = {
                               reqMomo.write(body);
                               reqMomo.end();
                             }
-
-                            res.status(200).json({
-                              message: 'successful',
-                            });
+                            else{
+                              res.status(200).json({
+                                message: 'successful',
+                              });
+                            }
                           } catch (err) {
                             res.status(400).json({
                               message: err.message,
