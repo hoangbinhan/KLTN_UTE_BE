@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const  CustomersAccountSchema = mongoose.Schema({
     password : {
         type : String,
-        required : true,
     },
     role : {
         type : String,

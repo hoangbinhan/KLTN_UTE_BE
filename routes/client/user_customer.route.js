@@ -4,10 +4,12 @@ const UserCustomerService = require('../../controller/client/user_customer.contr
 const auth = require('../../common/auth');
 
 router.post('/register', UserCustomerService.register);
+router.post('/register-with-third-party', UserCustomerService.registerWithThirdParty);
 router.post('/login', UserCustomerService.login);
 router.post('/forgot-password', UserCustomerService.forgotPassword);
 router.put('/update-password', auth, UserCustomerService.updatePassword);
 router.post('/checkout', auth, UserCustomerService.checkout);
+router.post('/response-momo', UserCustomerService.responseDataMomo)
 
 router.post('/cart', auth, UserCustomerService.addToCart);
 router.get('/cart', auth, UserCustomerService.getCart);
