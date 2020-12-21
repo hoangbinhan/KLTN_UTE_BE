@@ -308,7 +308,6 @@ class OrderServices {
       res.status(400).json({ message: err.message });
     }
   }
-
   static async updateStatus(req, res) {
     try {
       const { _id, status } = req.body;

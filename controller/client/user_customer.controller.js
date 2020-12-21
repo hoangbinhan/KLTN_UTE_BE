@@ -6,9 +6,25 @@ const service = require('../../common/function');
 const bcrypt = require('bcrypt');
 const sendMail = require('.././sendMail.controller');
 const jwt = require('jsonwebtoken');
+const uuidv1 = require('uuid/v1');
+const https = require('https');
+const moment = require('moment');
+var endpoint = 'https://test-payment.momo.vn/gw_payment/transactionProcessor';
+var hostname = 'https://test-payment.momo.vn';
+var path = '/gw_payment/transactionProcessor';
+var partnerCode = 'MOMOPWRX20201211';
+var accessKey = 'VBWuaoUC0N69pBvg';
+var serectkey = 'GJOorUVT2R6txlsnCeI4ZGnYpmGNFvPp';
+var orderInfo = 'pay with MoMo';
+var returnUrl = process.env.RETURN_URL_MOMO || ''
+var notifyurl = process.env.NOTIFY_URL_MOMO || ''
+var requestType = 'captureMoMoWallet';
+var extraData = '';
 //
 
-const { CLIENT_URL } = process.env;
+const {
+  CLIENT_URL
+} = process.env;
 class APIfeatures {
   constructor(query, queryString) {
     this.query = query;
@@ -59,7 +75,13 @@ const StaffServices = {
   },
   register: async (req, res) => {
     try {
-      const { name, email, password, phoneNumber, address } = req.body;
+      const {
+        name,
+        email,
+        password,
+        phoneNumber,
+        address
+      } = req.body;
       if (!name || !email || !password)
         return res.status(400).json({
           msg: 'Please fill in all fields!',
@@ -101,16 +123,70 @@ const StaffServices = {
       });
     }
   },
-
+  registerWithThirdParty: async (req, res) => {
+    try {
+      const {
+        name,
+        email
+      } = req.body;
+      if (!name || !email)
+        return res.status(400).json({
+          msg: 'Some thing went wrong!',
+        });
+      if (!service.validateEmail(email))
+        return res.status(400).json({
+          msg: 'Invalid emails.',
+        });
+      const customer = await CustomerAccount.findOne({
+        email,
+      });
+      const token = service.createAccessToken({
+        email: email,
+        name: name,
+        role: 'customer',
+      });
+      if (customer) {
+        return res.status(200).json({
+          status: 'Login success!',
+          token: {
+            token,
+          },
+        });
+      }
+      const newStaff = {
+        name,
+        email,
+      };
+      const post = new CustomerAccount(newStaff);
+      await post.save();
+      return res.status(200).json({
+        status: 'Login success!',
+        token: {
+          token,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({
+        msg: err.message,
+      });
+    }
+  },
   activateEmail: async (req, res) => {
     try {
-      const { activation_token } = req.body;
+      const {
+        activation_token
+      } = req.body;
       const staff = jwt.verify(
         activation_token,
         process.env.ACTIVATION_TOKEN_SECRET
       );
 
-      const { staffID, name, email, password } = staff;
+      const {
+        staffID,
+        name,
+        email,
+        password
+      } = staff;
 
       const check = await Staff.findOne({
         email,
@@ -119,16 +195,13 @@ const StaffServices = {
         return res.status(400).json({
           msg: 'This email already exists.',
         });
-
       const newStaff = new Staff({
         staffID,
         name,
         email,
         password,
       });
-
       await newStaff.save();
-
       res.json({
         msg: 'Account has been activated!',
       });
@@ -143,7 +216,10 @@ const StaffServices = {
     try {
       let isAdd = false;
       const email = req.staff.email;
-      const { product, quantity } = req.body;
+      const {
+        product,
+        quantity
+      } = req.body;
       const productInStore = await Product.findOne({
         _id: product,
       });
@@ -176,8 +252,7 @@ const StaffServices = {
           quantity: quantity,
         });
       }
-      await CustomerAccount.findOneAndUpdate(
-        {
+      await CustomerAccount.findOneAndUpdate({
           email,
         },
         customer
@@ -193,7 +268,10 @@ const StaffServices = {
   },
   updateCart: async (req, res) => {
     const email = req.staff.email;
-    const { id, quantity } = req.body;
+    const {
+      id,
+      quantity
+    } = req.body;
     try {
       const customer = await CustomerAccount.findOne({
         email,
@@ -208,8 +286,7 @@ const StaffServices = {
           break;
         }
       }
-      await CustomerAccount.findOneAndUpdate(
-        {
+      await CustomerAccount.findOneAndUpdate({
           email,
         },
         customer
@@ -225,7 +302,9 @@ const StaffServices = {
   },
   deleteCart: async (req, res) => {
     const email = req.staff.email;
-    const { id } = req.body;
+    const {
+      id
+    } = req.body;
     try {
       const customer = await CustomerAccount.findOne({
         email,
@@ -240,8 +319,7 @@ const StaffServices = {
           break;
         }
       }
-      await CustomerAccount.findOneAndUpdate(
-        {
+      await CustomerAccount.findOneAndUpdate({
           email,
         },
         customer
@@ -297,7 +375,10 @@ const StaffServices = {
 
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const {
+        email,
+        password
+      } = req.body;
       const customer = await CustomerAccount.findOne({
         email,
       });
@@ -351,8 +432,7 @@ const StaffServices = {
     };
     var idCustomer = '';
     try {
-      await CustomerAccount.findOne(
-        {
+      await CustomerAccount.findOne({
           email: req.staff.email,
         },
         async function (err, customer) {
@@ -374,11 +454,9 @@ const StaffServices = {
                     postSave: 'err in postSave',
                   });
                 } else {
-                  CustomerAccount.findOneAndUpdate(
-                    {
+                  CustomerAccount.findOneAndUpdate({
                       _id: idCustomer,
-                    },
-                    {
+                    }, {
                       $push: {
                         invoices: postOrder._id,
                       },
@@ -395,7 +473,7 @@ const StaffServices = {
                         try {
                           for (let i = 0; i < productsInvoice.length; i++) {
                             const storedProduct = await Product.findOne({
-                              _id: productsInvoice[i].item._id,
+                              _id: productsInvoice[i]._id,
                             });
                             const isSoldOut =
                               (await storedProduct.quantity) -
@@ -406,14 +484,11 @@ const StaffServices = {
                               });
                             } else {
                               try {
-                                await Product.findOneAndUpdate(
-                                  {
-                                    _id: productsInvoice[i].item._id,
-                                  },
-                                  {
-                                    quantity: isSoldOut,
-                                  }
-                                );
+                                await Product.findOneAndUpdate({
+                                  _id: productsInvoice[i]._id,
+                                }, {
+                                  quantity: isSoldOut,
+                                });
                               } catch (err) {
                                 res.status(400).json({
                                   message: err.message,
@@ -430,9 +505,84 @@ const StaffServices = {
                               totalDetail,
                             });
                             const detailOrder = await postDetail.save();
-                            res.status(200).json({
-                              message: 'successful',
-                            });
+                            //TODO: Fix here
+                            if (paymentDetail.paymentMethod == 'Momo Payment') {
+                              var rawSignature =
+                                'partnerCode=' +
+                                partnerCode +
+                                '&accessKey=' +
+                                accessKey +
+                                '&requestId=' +
+                                postOrder._id +
+                                '&amount=' +
+                                totalDetail.total +
+                                '&orderId=' +
+                                postOrder._id +
+                                '&orderInfo=' +
+                                orderInfo +
+                                '&returnUrl=' +
+                                returnUrl +
+                                '&notifyUrl=' +
+                                notifyurl +
+                                '&extraData=' +
+                                extraData;
+                              const crypto = require('crypto');
+                              var signature = await crypto
+                                .createHmac('sha256', serectkey)
+                                .update(rawSignature)
+                                .digest('hex');
+                              var body = JSON.stringify({
+                                partnerCode: partnerCode,
+                                accessKey: accessKey,
+                                requestId: postOrder._id,
+                                amount: totalDetail.total + '',
+                                orderId: postOrder._id,
+                                orderInfo: orderInfo,
+                                returnUrl: returnUrl,
+                                notifyUrl: notifyurl,
+                                extraData: extraData,
+                                requestType: requestType,
+                                signature: signature,
+                              });
+                              var options = {
+                                hostname: 'test-payment.momo.vn',
+                                port: 443,
+                                path: '/gw_payment/transactionProcessor',
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Content-Length': Buffer.byteLength(body),
+                                },
+                              };
+                              var reqMomo = https.request(
+                                options,
+                                (resMomo) => {
+                                  resMomo.setEncoding('utf8');
+                                  resMomo.on('data', async (body) => {
+                                    await res.status(200).json({
+                                      urlQrcode: JSON.parse(body).payUrl,
+                                      message: 'successful',
+                                    });
+                                  });
+                                  resMomo.on('end', (data) => {
+                                    console.log(data);
+                                    console.log('No more data in response.');
+                                  });
+                                }
+                              );
+                              reqMomo.on('error', (e) => {
+                                console.log(
+                                  `problem with request: ${e.message}`
+                                );
+                              });
+                              // write data to request body
+                              reqMomo.write(body);
+                              reqMomo.end();
+                            } else {
+                              res.status(200).json({
+                                message: 'successful',
+                              });
+                            }
                           } catch (err) {
                             res.status(400).json({
                               message: err.message,
@@ -457,6 +607,11 @@ const StaffServices = {
         message: err.message,
       });
     }
+  },
+
+  responseDataMomo: async (req, res) => {
+    console.log('abc');
+    console.log(req.query);
   },
 
   getAccessToken: (req, res) => {
@@ -487,10 +642,11 @@ const StaffServices = {
       });
     }
   },
-
   forgotPassword: async (req, res) => {
     try {
-      const { email } = req.body;
+      const {
+        email
+      } = req.body;
       const customer = await CustomerAccount.findOne({
         email,
       });
@@ -516,16 +672,15 @@ const StaffServices = {
 
   updatePassword: async (req, res) => {
     try {
-      const { password } = req.body;
+      const {
+        password
+      } = req.body;
       const passwordHash = await bcrypt.hash(password, 12);
-      await CustomerAccount.findOneAndUpdate(
-        {
-          email: req.staff.email,
-        },
-        {
-          password: passwordHash,
-        }
-      );
+      await CustomerAccount.findOneAndUpdate({
+        email: req.staff.email,
+      }, {
+        password: passwordHash,
+      });
       res.json({
         msg: 'Password successfully changed!',
       });
@@ -538,7 +693,9 @@ const StaffServices = {
 
   getOrders: async (req, res) => {
     try {
-      const { email } = req.staff;
+      const {
+        email
+      } = req.staff;
       const customer = await CustomerAccount.findOne({
         email,
       });
@@ -553,6 +710,7 @@ const StaffServices = {
         });
         if (order) orders.push(order);
       }
+      orders.reverse()
       return res.status(200).json({
         data: orders,
         length: orders.length,
@@ -566,7 +724,9 @@ const StaffServices = {
   getDetailOrder: async (req, res) => {
     try {
       const id = req.query.id;
-      const { email } = req.staff;
+      const {
+        email
+      } = req.staff;
       const customer = await CustomerAccount.findOne({
         email,
       });
@@ -577,21 +737,34 @@ const StaffServices = {
       const invoicesLength = customer.invoices.length;
       for (let i = 0; i < invoicesLength; i++) {
         if (customer.invoices[i] == id) {
-          const orderDetail = await Order_Detail.findOne({ orderID: id });
-          if (!orderDetail)
+          const order = await Order.findOne({
+            _id: id
+          })
+          const orderDetail = await Order_Detail.findOne({
+            orderID: id,
+          });
+          if (!orderDetail || !order)
             return res.status(500).json({
               msg: 'Can not find the order!',
             });
-          return res.status(200).json({ data: orderDetail });
+          const data = JSON.parse(JSON.stringify(orderDetail))
+          data.status = order.status
+          return res.status(200).json({
+            data
+          });
         }
       }
     } catch (err) {
-      res.status(500).json({ msg: err.message });
+      res.status(500).json({
+        msg: err.message,
+      });
     }
   },
   getInformation: async (req, res) => {
     try {
-      const { email } = req.staff;
+      const {
+        email
+      } = req.staff;
       const info = await CustomerAccount.findOne({
         email,
       });
@@ -616,20 +789,18 @@ const StaffServices = {
   },
   updateInformation: async (req, res) => {
     try {
-      const { email } = req.staff;
-      const info = await CustomerAccount.findOneAndUpdate(
-        {
-          email,
-        },
-        {
-          name: req.body.name,
-          phoneNumber: req.body.phoneNumber,
-          address: req.body.address,
-        },
-        {
-          new: true,
-        }
-      );
+      const {
+        email
+      } = req.staff;
+      const info = await CustomerAccount.findOneAndUpdate({
+        email,
+      }, {
+        name: req.body.name,
+        phoneNumber: req.body.phoneNumber,
+        address: req.body.address,
+      }, {
+        new: true,
+      });
       if (!info)
         return res.status(500).json({
           msg: 'Can not find the customer!',
@@ -643,14 +814,101 @@ const StaffServices = {
       });
     }
   },
+  ratingProduct: async (req, res) => {
+    try {
+      const {
+        email
+      } = req.staff;
+      const {
+        rating,
+        comment,
+        id
+      } = req.body;
+      if (!email)
+        return res.status(500).json({
+          msg: 'can not find the customer!',
+        });
+      const record = {
+        email,
+        rating,
+        comment,
+        date: moment().format('MMMM Do YYYY, h:mm:ss a'),
+      };
+      const product = await Product.findByIdAndUpdate({
+        _id: id,
+      }, {
+        $push: {
+          comment: record,
+        },
+      });
+      if (!product)
+        return res.status(500).json({
+          msg: 'can not find the customer!',
+        });
+      return res.status(200).json({
+        msg: 'successfull',
+      });
+    } catch (err) {
+      return res.status(500).json({
+        msg: err.message,
+      });
+    }
+  },
+  cancelInvoice: async (req, res) => {
+    try {
+      const id = req.body.id
+      await Order.findOneAndUpdate({
+        _id: id
+      }, {
+        status: 'CANCEL'
+      }, {
+        new: true
+      });
+      const orderDetail = await Order_Detail.findOne({
+        orderID: id
+      })
+      if (!orderDetail) return res.status(500).json({
+        msg: 'Can not find the order detail'
+      })
+      const {
+        productsInvoice
+      } = orderDetail
+      for (let i = 0; i < productsInvoice.length; i++) {
+        const {
+          _id
+        } = productsInvoice[i]
+        const quantityProductOrder = productsInvoice[i].quantity
+        const product = await Product.findOne({
+          _id
+        })
+        if (product) {
+          let updateQuantity = product.quantity + quantityProductOrder
+          await Product.findOneAndUpdate({
+            _id: product._id
+          }, {
+            quantity: updateQuantity
+          }, {
+            new: true
+          })
+        }
+      }
+      return res.status(200).json({
+        msg: 'successful'
+      })
+    } catch (err) {
+      return res.status(500).json({
+        msg: err.message
+      })
+    }
+  },
   getStaffInfor: async (req, res) => {
     try {
       const feature = new APIfeatures(
-        Staff.findOne({
-          staffID: req.staff.id,
-        }).select('-password'),
-        req.query
-      )
+          Staff.findOne({
+            staffID: req.staff.id,
+          }).select('-password'),
+          req.query
+        )
         .filtering()
         .sorting();
       // const staff = await Staff.findOne({ staffID: req.staff.id }).select('-password')
@@ -682,14 +940,14 @@ const StaffServices = {
       //     name, // avatar
       // })
       // res.json({ msg: "Update Success!" })
-      const { staffID } = req.body;
+      const {
+        staffID
+      } = req.body;
       const updateField = service.genUpdate(req.body, ['name', 'status']);
-      await Staff.findOneAndUpdate(
-        {
+      await Staff.findOneAndUpdate({
           staffID,
         },
-        updateField,
-        {
+        updateField, {
           new: true,
         },
         (err, result) => {
@@ -708,16 +966,15 @@ const StaffServices = {
   },
   updateStaffsRole: async (req, res) => {
     try {
-      const { role } = req.body;
+      const {
+        role
+      } = req.body;
 
-      await Staff.findOneAndUpdate(
-        {
-          staffID: req.params.id,
-        },
-        {
-          role,
-        }
-      );
+      await Staff.findOneAndUpdate({
+        staffID: req.params.id,
+      }, {
+        role,
+      });
 
       res.json({
         msg: 'Update Success!',
@@ -739,9 +996,10 @@ const StaffServices = {
       //     res.json(false)
       // }
 
-      const { staffID } = req.body;
-      await Staff.deleteOne(
-        {
+      const {
+        staffID
+      } = req.body;
+      await Staff.deleteOne({
           staffID,
         },
         async (err, result) => {
@@ -758,15 +1016,14 @@ const StaffServices = {
   },
   deleteStaffStatus: async (req, res) => {
     try {
-      const { staffID } = req.body;
-      await Staff.findOneAndUpdate(
-        {
+      const {
+        staffID
+      } = req.body;
+      await Staff.findOneAndUpdate({
           staffID,
-        },
-        {
+        }, {
           status: 'INACTIVE',
-        },
-        {
+        }, {
           new: true,
         },
         async (err, result) => {
