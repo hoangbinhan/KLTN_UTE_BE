@@ -611,7 +611,6 @@ const StaffServices = {
 
   responseDataMomo: async (req, res) => {
     console.log('abc');
-    console.log(req.query);
   },
 
   getAccessToken: (req, res) => {
