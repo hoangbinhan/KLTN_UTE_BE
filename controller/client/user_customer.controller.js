@@ -16,8 +16,8 @@ var partnerCode = 'MOMOPWRX20201211';
 var accessKey = 'VBWuaoUC0N69pBvg';
 var serectkey = 'GJOorUVT2R6txlsnCeI4ZGnYpmGNFvPp';
 var orderInfo = 'pay with MoMo';
-var returnUrl = 'https://google.com';
-var notifyurl = 'https://google.com';
+var returnUrl = process.env.RETURN_URL_MOMO || ''
+var notifyurl = process.env.NOTIFY_URL_MOMO || ''
 var requestType = 'captureMoMoWallet';
 var extraData = '';
 //
@@ -145,7 +145,7 @@ const StaffServices = {
         name: name,
         role: 'customer',
       });
-      if (customer){
+      if (customer) {
         return res.status(200).json({
           status: 'Login success!',
           token: {
@@ -195,16 +195,13 @@ const StaffServices = {
         return res.status(400).json({
           msg: 'This email already exists.',
         });
-
       const newStaff = new Staff({
         staffID,
         name,
         email,
         password,
       });
-
       await newStaff.save();
-
       res.json({
         msg: 'Account has been activated!',
       });
@@ -581,8 +578,7 @@ const StaffServices = {
                               // write data to request body
                               reqMomo.write(body);
                               reqMomo.end();
-                            }
-                            else{
+                            } else {
                               res.status(200).json({
                                 message: 'successful',
                               });
@@ -614,7 +610,8 @@ const StaffServices = {
   },
 
   responseDataMomo: async (req, res) => {
-    console.log(req.body);
+    console.log('abc');
+    console.log(req.query);
   },
 
   getAccessToken: (req, res) => {
@@ -713,6 +710,7 @@ const StaffServices = {
         });
         if (order) orders.push(order);
       }
+      orders.reverse()
       return res.status(200).json({
         data: orders,
         length: orders.length,
@@ -739,15 +737,20 @@ const StaffServices = {
       const invoicesLength = customer.invoices.length;
       for (let i = 0; i < invoicesLength; i++) {
         if (customer.invoices[i] == id) {
+          const order = await Order.findOne({
+            _id: id
+          })
           const orderDetail = await Order_Detail.findOne({
             orderID: id,
           });
-          if (!orderDetail)
+          if (!orderDetail || !order)
             return res.status(500).json({
               msg: 'Can not find the order!',
             });
+          const data = JSON.parse(JSON.stringify(orderDetail))
+          data.status = order.status
           return res.status(200).json({
-            data: orderDetail,
+            data
           });
         }
       }
@@ -849,6 +852,53 @@ const StaffServices = {
       return res.status(500).json({
         msg: err.message,
       });
+    }
+  },
+  cancelInvoice: async (req, res) => {
+    try {
+      const id = req.body.id
+      await Order.findOneAndUpdate({
+        _id: id
+      }, {
+        status: 'CANCEL'
+      }, {
+        new: true
+      });
+      const orderDetail = await Order_Detail.findOne({
+        orderID: id
+      })
+      if (!orderDetail) return res.status(500).json({
+        msg: 'Can not find the order detail'
+      })
+      const {
+        productsInvoice
+      } = orderDetail
+      for (let i = 0; i < productsInvoice.length; i++) {
+        const {
+          _id
+        } = productsInvoice[i]
+        const quantityProductOrder = productsInvoice[i].quantity
+        const product = await Product.findOne({
+          _id
+        })
+        if (product) {
+          let updateQuantity = product.quantity + quantityProductOrder
+          await Product.findOneAndUpdate({
+            _id: product._id
+          }, {
+            quantity: updateQuantity
+          }, {
+            new: true
+          })
+        }
+      }
+      return res.status(200).json({
+        msg: 'successful'
+      })
+    } catch (err) {
+      return res.status(500).json({
+        msg: err.message
+      })
     }
   },
   getStaffInfor: async (req, res) => {

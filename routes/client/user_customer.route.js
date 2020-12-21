@@ -22,6 +22,7 @@ router.get('/information', auth, UserCustomerService.getInformation);
 router.put('/information', auth, UserCustomerService.updateInformation);
 router.put('/change-password', auth, UserCustomerService.updatePassword);
 router.post('/rating', auth, UserCustomerService.ratingProduct);
+router.post('/cancel-invoice', auth, UserCustomerService.cancelInvoice)
 // router.get('/get-cart',serverSendEvent, UserCustomerService.getCart)
 
 module.exports = router;
