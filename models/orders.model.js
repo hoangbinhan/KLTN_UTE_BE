@@ -22,6 +22,9 @@ const OrderSchema = mongoose.Schema({
     },
     createBy:{
         type: mongoose.Types.ObjectId,
+    },
+    momoUrl: {
+        type: String
     }
 });
 module.exports = mongoose.model('Orders', OrderSchema);

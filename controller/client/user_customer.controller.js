@@ -559,6 +559,13 @@ const StaffServices = {
                                 (resMomo) => {
                                   resMomo.setEncoding('utf8');
                                   resMomo.on('data', async (body) => {
+                                    await Order.findOneAndUpdate({
+                                      _id: postOrder._id
+                                    }, {
+                                      momoUrl: JSON.parse(body).payUrl
+                                    }, {
+                                      new: true
+                                    })
                                     await res.status(200).json({
                                       urlQrcode: JSON.parse(body).payUrl,
                                       message: 'successful',
@@ -859,7 +866,8 @@ const StaffServices = {
       await Order.findOneAndUpdate({
         _id: id
       }, {
-        status: 'CANCEL'
+        status: 'CANCEL',
+        momoUrl: ''
       }, {
         new: true
       });
