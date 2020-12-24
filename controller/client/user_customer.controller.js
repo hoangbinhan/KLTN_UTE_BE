@@ -865,7 +865,7 @@ const StaffServices = {
           _id: id,
         },
         {
-          status: 'CANCEL',
+          status: 'CANCELED',
         },
         {
           new: true,
