@@ -593,7 +593,7 @@ const StaffServices = {
 
   responseDataMomo: async (req, res) => {
     const { orderId, errorCode } = req.body;
-    if (errorCode === 0) {
+    if (errorCode == 0) {
       await Order.findOneAndUpdate(
         { _id: orderId },
         { status: 'PAID', momoUrl: undefined },
