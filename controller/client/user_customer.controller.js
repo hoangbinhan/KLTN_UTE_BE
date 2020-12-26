@@ -5,6 +5,7 @@ const Order_Detail = require('../../models/orders_detail.model');
 const service = require('../../common/function');
 const bcrypt = require('bcrypt');
 const sendMail = require('.././sendMail.controller');
+const senDigitalBil = require('./sendDigitalBil.controller');
 const jwt = require('jsonwebtoken');
 const uuidv1 = require('uuid/v1');
 const https = require('https');
@@ -541,6 +542,12 @@ const StaffServices = {
                                   resMomo.on('data', async (body) => {
                                     const urlQrcode = await JSON.parse(body)
                                       .payUrl;
+                                    console.log(urlQrcode);
+                                    await Order.findOneAndUpdate(
+                                      { _id: postOrder._id },
+                                      { momoUrl: urlQrcode },
+                                      { new: true }
+                                    );
                                     await res.status(200).json({
                                       urlQrcode,
                                       message: 'successful',
@@ -599,6 +606,11 @@ const StaffServices = {
         { status: 'PAID', momoUrl: undefined },
         { new: true }
       );
+      const order = await Order.findOne({ _id: orderId });
+      const detailOrder = await detailOrder.findOne({ orderID: orderId });
+      const customer = await CustomerAccount.findOne({ _id: order.customer });
+      const { email } = customer;
+      senDigitalBil(email, detailOrder, 'Digital Bill');
     } else {
       await Order.findOneAndUpdate(
         { _id: orderId },
