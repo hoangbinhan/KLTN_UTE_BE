@@ -607,7 +607,7 @@ const StaffServices = {
           { status: 'PAID', momoUrl: undefined },
           { new: true }
         );
-        const data = await detailOrder.findOne({ orderID: orderId });
+        const data = await Order_Detail.findOne({ orderID: orderId });
         console.log(
           'detailOrder.customerDetail.email',
           data.customerDetail.email
