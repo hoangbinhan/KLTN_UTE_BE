@@ -172,7 +172,7 @@ const sendDigitalBill = (to, data, txt) => {
                             
                             <td>
                                 Invoice #: ${
-                                  data.orderId
+                                  data.orderID
                                 }<br>                             
                             </td>
                         </tr>

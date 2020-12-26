@@ -606,11 +606,12 @@ const StaffServices = {
         { status: 'PAID', momoUrl: undefined },
         { new: true }
       );
-      const order = await Order.findOne({ _id: orderId });
       const detailOrder = await detailOrder.findOne({ orderID: orderId });
-      const customer = await CustomerAccount.findOne({ _id: order.customer });
-      const { email } = customer;
-      senDigitalBil(email, detailOrder, 'Digital Bill');
+      senDigitalBil(
+        detailOrder.customerDetail.email,
+        detailOrder,
+        'Digital Bill'
+      );
     } else {
       await Order.findOneAndUpdate(
         { _id: orderId },
