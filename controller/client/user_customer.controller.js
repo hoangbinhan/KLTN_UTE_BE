@@ -608,10 +608,6 @@ const StaffServices = {
           { new: true }
         );
         const data = await Order_Detail.findOne({ orderID: orderId });
-        console.log(
-          'detailOrder.customerDetail.email',
-          data.customerDetail.email
-        );
         senDigitalBil(data.customerDetail.email, data, 'Digital Bill');
       } else {
         await Order.findOneAndUpdate(
