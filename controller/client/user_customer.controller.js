@@ -607,7 +607,10 @@ const StaffServices = {
         { new: true }
       );
       const detailOrder = await detailOrder.findOne({ orderID: orderId });
-      console.log(detailOrder.customerDetail.email);
+      console.log(
+        'detailOrder.customerDetail.email',
+        detailOrder.customerDetail.email
+      );
       senDigitalBil(
         detailOrder.customerDetail.email,
         detailOrder,
