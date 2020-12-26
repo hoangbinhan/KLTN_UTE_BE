@@ -599,46 +599,50 @@ const StaffServices = {
   },
 
   responseDataMomo: async (req, res) => {
-    const { orderId, errorCode } = req.body;
-    if (errorCode == 0) {
-      await Order.findOneAndUpdate(
-        { _id: orderId },
-        { status: 'PAID', momoUrl: undefined },
-        { new: true }
-      );
-      const detailOrder = await detailOrder.findOne({ orderID: orderId });
-      console.log(
-        'detailOrder.customerDetail.email',
-        detailOrder.customerDetail.email
-      );
-      senDigitalBil(
-        detailOrder.customerDetail.email,
-        detailOrder,
-        'Digital Bill'
-      );
-    } else {
-      await Order.findOneAndUpdate(
-        { _id: orderId },
-        { status: 'CANCELED', momoUrl: undefined },
-        { new: true }
-      );
-      const detailOrder = await Order_Detail.findOne({ orderID: orderId });
-      if (detailOrder) {
-        for (let i = 0; i < detailOrder.productsInvoice.length; i++) {
-          const product = await Product.findOne({
-            _id: detailOrder.productsInvoice[i]._id,
-          });
-          if (product) {
-            const updateQuantity =
-              product.quantity + detailOrder.productsInvoice[i].quantity;
-            await Product.findOneAndUpdate(
-              { _id: detailOrder.productsInvoice[i]._id },
-              { quantity: updateQuantity },
-              { new: true }
-            );
+    try {
+      const { orderId, errorCode } = req.body;
+      if (errorCode == 0) {
+        await Order.findOneAndUpdate(
+          { _id: orderId },
+          { status: 'PAID', momoUrl: undefined },
+          { new: true }
+        );
+        const detailOrder = await detailOrder.findOne({ orderID: orderId });
+        console.log(
+          'detailOrder.customerDetail.email',
+          detailOrder.customerDetail.email
+        );
+        senDigitalBil(
+          detailOrder.customerDetail.email,
+          detailOrder,
+          'Digital Bill'
+        );
+      } else {
+        await Order.findOneAndUpdate(
+          { _id: orderId },
+          { status: 'CANCELED', momoUrl: undefined },
+          { new: true }
+        );
+        const detailOrder = await Order_Detail.findOne({ orderID: orderId });
+        if (detailOrder) {
+          for (let i = 0; i < detailOrder.productsInvoice.length; i++) {
+            const product = await Product.findOne({
+              _id: detailOrder.productsInvoice[i]._id,
+            });
+            if (product) {
+              const updateQuantity =
+                product.quantity + detailOrder.productsInvoice[i].quantity;
+              await Product.findOneAndUpdate(
+                { _id: detailOrder.productsInvoice[i]._id },
+                { quantity: updateQuantity },
+                { new: true }
+              );
+            }
           }
         }
       }
+    } catch (err) {
+      console.log(err.message);
     }
   },
 
