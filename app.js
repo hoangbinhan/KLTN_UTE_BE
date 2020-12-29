@@ -32,8 +32,10 @@ dashboardSocket.on('connect', (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  interval = setInterval(() => dashboardController.getWidget(socket), 1000);
-
+  interval = setInterval(() => {
+    dashboardController.getWidget(socket);
+    dashboardController.getNewestOrder(socket);
+  }, 2000);
   dashboardSocket.on('disconnect', (reason) => {
     console.log('disconnected socket');
   });
@@ -66,6 +68,7 @@ const uploadImage = require('./routes/upload.route');
 const categoriesrouter = require('./routes/categories.route');
 const children_category = require('./routes/children_category.route');
 const staff = require('./routes/staffs_account.route');
+const dashboard = require('./routes/dashboard.route');
 //client
 const client_home = require('./routes/client/home.route');
 const client_product = require('./routes/client/detail_product.route');
@@ -95,6 +98,7 @@ app.use('/api/upload', uploadImage);
 app.use('/api/staff', staff);
 app.use('/api/categories', categoriesrouter);
 app.use('/api/children_category', children_category);
+app.use('/api/dashboard', dashboard);
 //client
 app.use('/api/client/home', client_home);
 app.use('/api/client/product', client_product);

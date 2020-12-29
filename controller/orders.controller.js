@@ -24,14 +24,6 @@ class OrderServices {
           $lte: to_date,
         },
       };
-      //===================TODO FIX======================
-      // let objectSearchCustomer = await [
-      //     {phoneNumber: query.text ?  {$regex: query.text, $options: 'i'} : undefined},
-      //     {firstName:  query.text ?  {$regex: query.text, $options: 'i'} : undefined},
-      //     {lastName:  query.text ?  {$regex: query.text, $options: 'i'} : undefined}
-      // ]
-      // let conditionCustomer = await objectSearchCustomer.filter(item=>Object.values(item)[0]!==undefined)
-      //=================================================
       let conditionCustomer = await {
         phoneNumber: query.text
           ? { $regex: query.text, $options: 'i' }
