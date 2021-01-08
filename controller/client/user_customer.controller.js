@@ -872,13 +872,15 @@ const StaffServices = {
   },
   cancelInvoice: async (req, res) => {
     try {
-      const id = req.body.id;
+      const { id, reason } = req.body;
+      console.log(reason);
       await Order.findOneAndUpdate(
         {
           _id: id,
         },
         {
           status: 'CANCELED',
+          reason: reason,
         },
         {
           new: true,

@@ -26,5 +26,8 @@ const OrderSchema = mongoose.Schema({
   momoUrl: {
     type: String,
   },
+  reason: {
+    type: String,
+  },
 });
 module.exports = mongoose.model('Orders', OrderSchema);
