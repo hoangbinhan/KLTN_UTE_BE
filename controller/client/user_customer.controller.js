@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const uuidv1 = require('uuid/v1');
 const https = require('https');
 const moment = require('moment');
+const orders_detailModel = require('../../models/orders_detail.model');
 var endpoint = 'https://test-payment.momo.vn/gw_payment/transactionProcessor';
 var hostname = 'https://test-payment.momo.vn';
 var path = '/gw_payment/transactionProcessor';
@@ -313,8 +314,8 @@ const StaffServices = {
   },
 
   getCart: async (req, res) => {
-    const email = req.staff.email;
     try {
+      const email = req.staff.email;
       let cart = [];
       let price = 0;
       let totalItem = 0;
@@ -346,7 +347,7 @@ const StaffServices = {
       });
     } catch (err) {
       return res.status(400).json({
-        msg: err.message,
+        msg: 'Some thing went wrong',
       });
     }
   },
@@ -835,35 +836,66 @@ const StaffServices = {
   },
   ratingProduct: async (req, res) => {
     try {
+      let isComment = false;
       const { email } = req.staff;
       const { rating, comment, id } = req.body;
       if (!email)
         return res.status(500).json({
           msg: 'can not find the customer!',
         });
-      const record = {
-        email,
-        rating,
-        comment,
-        date: moment().format('MMMM Do YYYY, h:mm:ss a'),
-      };
-      const product = await Product.findByIdAndUpdate(
-        {
-          _id: id,
-        },
-        {
-          $push: {
-            comment: record,
-          },
-        }
-      );
-      if (!product)
+      const customer = await CustomerAccount.findOne({ email });
+      if (!customer) {
         return res.status(500).json({
-          msg: 'can not find the customer!',
+          msg: err.message,
         });
-      return res.status(200).json({
-        msg: 'successfull',
-      });
+      }
+      for (let i = 0; i < customer.invoices.length; i++) {
+        const orderID = await customer.invoices[i];
+        const orderDetail = await orders_detailModel.findOne({ orderID });
+        if (!orderDetail) {
+          return res.status(500).json({
+            msg: err.message,
+          });
+        }
+        for (let j = 0; j < orderDetail.productsInvoice.length; j++) {
+          if (id == orderDetail.productsInvoice[j]._id) {
+            const order = await Order.findOne({ _id: orderDetail.orderID });
+            if (order && order.status == 'DELIVERED') {
+              isComment = true;
+              break;
+            }
+          }
+        }
+      }
+      if (isComment) {
+        const record = {
+          email,
+          rating,
+          comment,
+          date: moment().format('MMMM Do YYYY, h:mm:ss a'),
+        };
+        const product = await Product.findByIdAndUpdate(
+          {
+            _id: id,
+          },
+          {
+            $push: {
+              comment: record,
+            },
+          }
+        );
+        if (!product)
+          return res.status(500).json({
+            msg: 'can not find the customer!',
+          });
+        return res.status(200).json({
+          msg: 'successfull',
+        });
+      } else {
+        return res.status(500).json({
+          msg: 'you can not comment this product',
+        });
+      }
     } catch (err) {
       return res.status(500).json({
         msg: err.message,
